@@ -28,7 +28,7 @@ namespace Pico.Randoms
             }
             return text.ToString();
         }
-        public static string RandomString(int length, char[] chars = DefaultRandomStringChars)
+        public static string RandomString(int length, char[] chars = null)
         {
             if (chars == null) chars = DefaultRandomStringChars;
             StringBuilder text = new StringBuilder();
