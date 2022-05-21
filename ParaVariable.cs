@@ -16,16 +16,17 @@ namespace Pico.Threads
 
 
 
-        public ParaVariable(object function)
+        public ParaVariable(object function, object args)
         {
             thread = new Thread(new ParameterizedThreadStart(ThreadAction));
-            thread.Start(function);
+            ThreadData threadData = new ThreadData((Func<object,object>)function, args);
+            thread.Start(threadData);
         }
 
         void ThreadAction(object args)
         {
-            Func<object> function = args as Func<object>;
-            value = function();
+            ThreadData data = (ThreadData)args;
+            value = data.Function(data.Args);
         }
         /// <summary>
         /// Waits for function to complete,
@@ -36,6 +37,16 @@ namespace Pico.Threads
         {
             ThreadTools.JoinThread(thread);
             return value;
+        }
+        struct ThreadData
+        {
+            public Func<object, object> Function;
+            public object Args;
+            public ThreadData(Func<object,object> setFunction, object args)
+            {
+                Function = setFunction;
+                Args = args;
+            }
         }
     }
 }
