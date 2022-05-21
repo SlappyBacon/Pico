@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
-namespace Pico.Finders
+namespace Pico.Files
 {
     public class RunFinder
     {
