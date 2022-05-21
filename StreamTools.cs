@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Pico.Streams
 {
     /// <summary>
-    /// StreamTools is for reading and writing raw data to and from streams.
+    /// StreamTools is for reading and writing RAW DATA to and from streams.
     /// </summary>
     public static class StreamTools
     {

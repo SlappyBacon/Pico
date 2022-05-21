@@ -119,7 +119,11 @@ namespace Pico.Networking
         }
         #endregion
         #region Read / Write Text
-        //MAKE ALL LIKE THIS :)
+        /// <summary>
+        /// Write text to the stream.
+        /// </summary>
+        /// <param name="text">Text to write.</param>
+        /// <returns></returns>
         public bool WriteText(string text)
         {
             //Early return
@@ -144,6 +148,10 @@ namespace Pico.Networking
             SetNewKey();
             return true;
         }
+        /// <summary>
+        /// Read text from the stream.
+        /// </summary>
+        /// <returns></returns>
         public string ReadText()
         {
             //Early return
@@ -168,6 +176,11 @@ namespace Pico.Networking
         }
         #endregion
         #region Read / Write Int
+        /// <summary>
+        /// Write an int to the stream.
+        /// </summary>
+        /// <param name="number">Number to write.</param>
+        /// <returns></returns>
         public bool WriteInt(int number)
         {
             //Early return
@@ -186,6 +199,10 @@ namespace Pico.Networking
             SetNewKey();
             return true;
         }
+        /// <summary>
+        /// Read an int from the stream.
+        /// </summary>
+        /// <returns></returns>
         public int ReadInt()
         {
             //Early return
@@ -206,6 +223,11 @@ namespace Pico.Networking
         }
         #endregion
         #region Read / Write Long
+        /// <summary>
+        /// Write a long to the stream.
+        /// </summary>
+        /// <param name="number">Number to write.</param>
+        /// <returns></returns>
         public bool WriteLong(long number)
         {
             //Early return
@@ -224,6 +246,10 @@ namespace Pico.Networking
             SetNewKey();
             return true;
         }
+        /// <summary>
+        /// Read a long from the stream.
+        /// </summary>
+        /// <returns></returns>
         public long ReadLong()
         {
             //Early return
@@ -244,6 +270,11 @@ namespace Pico.Networking
         }
         #endregion
         #region Read / Write Byte[]
+        /// <summary>
+        /// Write bytes to the stream.
+        /// </summary>
+        /// <param name="bytes">Bytes to write.</param>
+        /// <returns></returns>
         public bool WriteByteArray(byte[] bytes)
         {
             //Early return
@@ -263,7 +294,10 @@ namespace Pico.Networking
             SetNewKey();
             return true;
         }
-
+        /// <summary>
+        /// Read bytes from the stream.
+        /// </summary>
+        /// <returns></returns>
         public byte[] ReadByteArray()
         {
             //Early return
@@ -283,7 +317,7 @@ namespace Pico.Networking
         /// <summary>
         /// Write int array to the stream.
         /// </summary>
-        /// <param name="array">What to write</param>
+        /// <param name="array">Ints to write.</param>
         /// <returns></returns>
         public bool WriteIntArray(int[] array)
         {
@@ -374,7 +408,14 @@ namespace Pico.Networking
         //Encryption not working with these...
         //Finish :)
         #region Pipe In and Out(WIP)
-        public bool PipeIn(Stream fromStream, long count = 1, int bufferSize = 1)
+        /// <summary>
+        /// WIP, DO NOT USE
+        /// </summary>
+        /// <param name="fromStream"></param>
+        /// <param name="count"></param>
+        /// <param name="bufferSize"></param>
+        /// <returns></returns>
+        bool PipeIn(Stream fromStream, long count = 1, int bufferSize = 1)
         {
             //Read from local stream , encrypt it, then send it to partner
             //Count is also the remaining bytes
@@ -601,7 +642,7 @@ namespace Pico.Networking
             GetNewKey();
             return true;
         }
-        #endregion  //REWORK!
+        #endregion
         #region Read / Write File (WIP)
         /// <summary>
         /// Pipe bytes from file to network stream
@@ -609,7 +650,7 @@ namespace Pico.Networking
         /// </summary>
         /// <param name="readFilePath">Path to read from</param>
         /// <returns></returns>
-        public bool WriteFile(string readFilePath)
+        bool WriteFile(string readFilePath)
         {
             if (stream == null) return false;
 

@@ -4,13 +4,11 @@ using System.Threading;
 
 namespace Pico.Jobs
 {
-    //The intention of this project was to make
-    //multithreading tasks easier.
+    /// <summary>
+    /// An action, or collection of actions which can be multithreaded.
+    /// </summary>
     public class Job : IDisposable
     {
-
-        
-
         private static Thread[]? workThreads;
 
         private static Action<object>[]? actions;    // Each workload consists of an action
@@ -39,7 +37,10 @@ namespace Pico.Jobs
             args = allActionArgs;
         }
 
-
+        /// <summary>
+        /// Start executing job.
+        /// </summary>
+        /// <param name="threadCount">Number of threads to execute on.</param>
         public void Execute(int threadCount = 1)
         {
             //Only able to run once
@@ -59,7 +60,9 @@ namespace Pico.Jobs
             //all work has been assigned
         }
 
-
+        /// <summary>
+        /// Wait for job to finish before continuing...
+        /// </summary>
         public void WaitForEnd()
         {
             ThreadTools.JoinThreads(workThreads);

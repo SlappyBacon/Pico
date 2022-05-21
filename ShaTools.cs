@@ -5,6 +5,9 @@ using Pico.Conversion;
 
 namespace Pico.Cryptography
 {
+    /// <summary>
+    /// Quickly hash things.
+    /// </summary>
     public static class ShaTools
     {
         #region Sha1

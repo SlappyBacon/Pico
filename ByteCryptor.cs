@@ -6,10 +6,13 @@ using System.Threading.Tasks;
 
 namespace Pico.Cryptography;
 
+/// <summary>
+/// Simple ecryption, but it's something.
+/// </summary>
 public static class ByteCryptor
 {
     /// <summary>
-    /// Simple ecryption, but it's something.
+    /// Encrypt bytes.
     /// </summary>
     /// <param name="bytes">Bytes to encrypt.</param>
     /// <param name="key">The key.</param>
@@ -23,11 +26,11 @@ public static class ByteCryptor
             return null;
         }
 
-        
+        int newByte;
         for (int i = 0; i < bytes.Length;)
         {
             //Shift byte
-            int newByte = bytes[i] + key[keyIndex];
+            newByte = bytes[i] + key[keyIndex];
             while (newByte > byte.MaxValue) newByte -= byte.MaxValue;
             bytes[i] = (byte)newByte;
 
@@ -39,9 +42,9 @@ public static class ByteCryptor
         return bytes;
     }
     /// <summary>
-    /// Simple ecryption, but it's something.
+    /// Decrypt bytes.
     /// </summary>
-    /// <param name="bytes">Bytes to encrypt.</param>
+    /// <param name="bytes">Bytes to decrypt.</param>
     /// <param name="key">The key.</param>
     /// <param name="keyIndex">The starting key index.</param>
     /// <returns></returns>
@@ -53,10 +56,11 @@ public static class ByteCryptor
         }
         if (keyIndex < 0 || keyIndex >= key.Length) keyIndex = 0;
 
+        int newByte;
         for (int i = 0; i < bytes.Length;)
         {
             //Shift byte
-            int newByte = bytes[i] - key[keyIndex];
+            newByte = bytes[i] - key[keyIndex];
             while (newByte < byte.MinValue) newByte += byte.MaxValue;
             bytes[i] = (byte)newByte;
 

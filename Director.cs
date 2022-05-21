@@ -9,21 +9,8 @@ namespace Pico.Networking
 {
     public class Director : IDisposable
     {
-
-
-
-
-        //Revisit this...  It's kinda doo-doo.
-
-        //Replace all this with a BaseServer, then set the action to assigning things...
-
-
-
-
-
-
-
-
+        //Revisit this...
+        //Probably a better way...
         public int[] ServePorts { get { return servePorts; } }
 
         int assignPort;

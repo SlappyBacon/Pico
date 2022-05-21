@@ -1,14 +1,21 @@
 using Pico.Jobs;
-using System.Collections.Generic;
 using System.Net;
+using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
 namespace Pico.Networking
 {
+    /// <summary>
+    /// A collection of IP tools.
+    /// </summary>
 	public static class IpTools
     {
-
+        /// <summary>
+        /// Get an array of local ip addresses on your current local network.
+        /// Not 100% stable...
+        /// </summary>
+        /// <returns></returns>
         public static string[] GetLocalDeviceIps()
         {
             string[] possibleIps = new string[256];
@@ -38,7 +45,7 @@ namespace Pico.Networking
         }
 
         /// <summary>
-        /// Returns this machine's Local IP Address
+        /// Returns this machine's local IP address
         /// </summary>
         /// <returns></returns>
         public static string MyLocalIp()
@@ -56,7 +63,7 @@ namespace Pico.Networking
         }
 
         /// <summary>
-        /// Returns this machine's Public IP Address
+        /// Returns this machine's public IP address
         /// </summary>
         /// <returns></returns>
 
@@ -73,7 +80,7 @@ namespace Pico.Networking
         }
 
         /// <summary>
-        /// Returns a TcpClient's Public IP Address
+        /// Returns a TcpClient's public IP address
         /// </summary>
         /// <returns></returns>
         public static string ClientIp(TcpClient client)

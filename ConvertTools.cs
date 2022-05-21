@@ -5,12 +5,11 @@ using System.Text;
 
 namespace Pico.Conversion
 {
+    /// <summary>
+    /// Abstract conversion tools.
+    /// </summary>
     public static class ConvertTools
     {
-
-        //OUTDATED\\
-        //There's probs better ways to do some of these
-
         #region Time - String
         /// <summary>
         /// Converts System.DateTime to a string and keeps the milliseconds.
@@ -95,31 +94,13 @@ namespace Pico.Conversion
             return result;
         }
         #endregion
-        #region String - Bytes
-        public static byte[] StringToBytes(string text)
-        {
-            byte[] bytes = new byte[text.Length];
-            for (int i = 0; i < bytes.Length;)
-            {
-                bytes[i] = (byte)text[i];
-                i++;
-            }
-            return bytes;
-        }
-        public static string BytesToString(byte[] bytes)
-        {
-            StringBuilder text = new StringBuilder();
-            for (int i = 0; i < bytes.Length;)
-            {
-                text.Append((char)bytes[i]);
-                i++;
-            }
-            return text.ToString();
-        }
-        #endregion
         #region Byte(s) - Hex
-        //EVERY BYTE CONVERTS TO A 2-CHAR STRING
-        //RANGE : 00 to FF  (0 to 255)
+        /// <summary>
+        /// Converts each byte to one two-char hex word.
+        /// (0 to 255) => (00 to FF)
+        /// </summary>
+        /// <param name="array">Bytes to convert.</param>
+        /// <returns>Hex.</returns>
         public static string ByteArrayToHex(byte[] array)
         {
             StringBuilder hex = new StringBuilder();
@@ -131,6 +112,12 @@ namespace Pico.Conversion
             }
             return hex.ToString();
         }
+        /// <summary>
+        /// Converts each two-char hex word to one byte.
+        /// (00 to FF) => (0 to 255) 
+        /// </summary>
+        /// <param name="hex">Hex to convert.</param>
+        /// <returns>Bytes.</returns>
         public static byte[] HexToByteArray(string hex)
         {
             if (hex.Length % 2 != 0) return new byte[0];
@@ -144,6 +131,12 @@ namespace Pico.Conversion
             }
             return array;
         }
+        /// <summary>
+        /// Converts one byte to one two-char hex word.
+        /// (0 to 255) => (00 to FF)
+        /// </summary>
+        /// <param name="num">Byte to convert.</param>
+        /// <returns>Hex.</returns>
         public static string ByteToHex(byte num)
         {
             Console.Write(num + " => ");
@@ -152,6 +145,12 @@ namespace Pico.Conversion
             Console.WriteLine(hexByte);
             return hexByte;
         }
+        /// <summary>
+        /// Converts one two-char hex word to one byte.
+        /// (00 to FF) => (0 to 255) 
+        /// </summary>
+        /// <param name="hex">Hex to convert.</param>
+        /// <returns>Byte.</returns>
         public static byte HexToByte(string hex)
         {
             Console.Write(hex + " => ");
@@ -169,6 +168,11 @@ namespace Pico.Conversion
         }
         #endregion
         #region Notations
+        /// <summary>
+        /// Display a number count in it's readable form.
+        /// </summary>
+        /// <param name="byteCount"></param>
+        /// <returns></returns>
         public static string FormatBytes(long byteCount)
         {
             string[] suf = { "B", "KB", "MB", "GB", "TB", "PB", "EB" }; //Longs run out around EB
@@ -179,8 +183,17 @@ namespace Pico.Conversion
             return (Math.Sign(byteCount) * num).ToString() + suf[place];
         }
 
+
+        /// <summary>
+        /// Returns the given number in scientific notation.
+        /// </summary>
+        /// <param name="number"></param>
+        /// <param name="unit"></param>
+        /// <returns></returns>
         public static string SciNo(float number, string unit = "U")
         {
+            //This method should be re-written...
+            //Perhapse more like FormatBytes() ?
             string note;
             if (number == 0)
             {

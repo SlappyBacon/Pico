@@ -9,13 +9,12 @@ namespace Pico.Finders
         //Finds all executables of the following types
         //within a directory
 
-
+        //////////////////////////////
+        //Generic rework => FileFinder
         //Change to scan every folder for a certain file type
         //Then return the list...
-
-
-
-
+        //////////////////////////////
+        
         public Dictionary<string,string> exes = new Dictionary<string,string>(1000); //.exe files (Windows Executable)
         public Dictionary<string,string> bats = new Dictionary<string,string>(1000); //.bat files (Batch Script)
         public Dictionary<string,string> ps1s = new Dictionary<string,string>(1000); //.pl1 files (PowerShell Script)

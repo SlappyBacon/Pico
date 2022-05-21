@@ -8,11 +8,26 @@ using System.Threading.Tasks;
 
 namespace Pico.Data
 {
+    /// <summary>
+    /// This class allows you to load variables from a file, 
+    /// use / modify them, and save them if desired.
+    /// NOTE: Not all non-primitives types are supported.
+    /// </summary>
     struct DataFile
     {
         //Type, Name, Value
         static Dictionary<Type, Dictionary<string, object>> data = new Dictionary<Type, Dictionary<string, object>>();
 
+
+
+        /// <summary>
+        /// Set / change variable data.
+        /// </summary>
+        /// <typeparam name="T">Variable type.</typeparam>
+        /// <param name="name">Name of variable.</param>
+        /// <param name="value">Value of variable.</param>
+        /// <param name="overwrite">Overwrite existing value?</param>
+        /// <returns></returns>
         public bool SetVariable<T>(string name, T value, bool overwrite = false)
         {
             if (!data.ContainsKey(typeof(T))) data[typeof(T)] = new Dictionary<string, object>();   //Create new dictionary to store T variables
@@ -20,7 +35,12 @@ namespace Pico.Data
             data[typeof(T)][name] = value;
             return true;
         }
-
+        /// <summary>
+        /// Get variable data.
+        /// </summary>
+        /// <typeparam name="T">Variable type.</typeparam>
+        /// <param name="name">Name of variable.</param>
+        /// <returns></returns>
         public T GetVariable<T>(string name)
         {
             if (!data.ContainsKey(typeof(T))) throw new Exception("Variable doesn't exist.");
@@ -28,7 +48,14 @@ namespace Pico.Data
             return (T)data[typeof(T)][name];
         }
 
-        public bool RemoveVariable<T>(string name)
+
+        /// <summary>
+        /// Delete variable data.
+        /// </summary>
+        /// <typeparam name="T">Variable type.</typeparam>
+        /// <param name="name">Name of variable.</param>
+        /// <returns></returns>
+        public bool DeleteVariable<T>(string name)
         {
             if (!data.ContainsKey(typeof(T))) return false;         //No variables of that type stored
             if (!data[typeof(T)].ContainsKey(name)) return false;   //No variable with that name stored
@@ -37,6 +64,11 @@ namespace Pico.Data
             return true;
         }
 
+        /// <summary>
+        /// Save data to disk.
+        /// </summary>
+        /// <param name="path">Save file path.</param>
+        /// <returns></returns>
         public bool Save(string path)
         {
             //if file exists, backup.  Overwrite old backup
@@ -64,7 +96,11 @@ namespace Pico.Data
             File.WriteAllLines(path, fileLines.ToArray());
             return true;
         }
-
+        /// <summary>
+        /// Load data from disk.
+        /// </summary>
+        /// <param name="path">Load file path.</param>
+        /// <returns></returns>
         public bool Load(string path)
         {
             //check if file exists
@@ -114,7 +150,7 @@ namespace Pico.Data
             return true;
         }
 
-        //PARSE ABSTRACT OBJECTS
+        #region Non-Primitives
         public object TextToType(string text, Type toType)
         {
             switch (toType.Name)
@@ -143,27 +179,6 @@ namespace Pico.Data
             float z = float.Parse(split[2]);
             return new Vector3(x, y, z);
         }
-
-
-        //DEBUGGING
-        public void DumpToConsole()
-        {
-            Console.WriteLine("---DUMP---");
-            StringBuilder stringBuilder = new StringBuilder();
-            foreach (Type t in data.Keys)
-            {
-                foreach (string n in data[t].Keys)
-                {
-                    stringBuilder.Append(t);
-                    stringBuilder.Append(" : ");
-                    stringBuilder.Append(n);
-                    stringBuilder.Append(" : ");
-                    stringBuilder.Append(data[t][n]);
-                    Console.WriteLine(stringBuilder.ToString());
-                    stringBuilder.Clear();
-                }
-            }
-            Console.WriteLine("----------");
-        }
+        #endregion
     }
 }

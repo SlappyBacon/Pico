@@ -5,6 +5,13 @@ namespace Pico.Args
 {
     public static class ArgTools
     {
+        /// <summary>
+        /// Finds the specified arg, then returns
+        /// the arg value following it as a string.
+        /// </summary>
+        /// <param name="args">Args to process.</param>
+        /// <param name="find">Arg to find.</param>
+        /// <returns></returns>
         public static string GetValue(string[] args, string find)
         {
 
@@ -42,6 +49,13 @@ namespace Pico.Args
         }
 
 
+        /// <summary>
+        /// Finds the specified arg, then returns
+        /// it's index.
+        /// </summary>
+        /// <param name="args">Args to process.</param>
+        /// <param name="find">Arg to find.</param>
+        /// <returns></returns>
         public static int IndexOf(string[] args, string find)
         {
             for (int i = 0; i < args.Length;)

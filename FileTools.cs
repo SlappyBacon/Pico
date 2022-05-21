@@ -8,10 +8,17 @@ using  Pico.Threads;
 
 namespace Pico.Files
 {
+    /// <summary>
+    /// A collection of abstract file tools.
+    /// </summary>
 	public static class FileTools
     {
 
-
+        /// <summary>
+        /// Input file path, returns the name of the file.
+        /// </summary>
+        /// <param name="filePath">File path.</param>
+        /// <returns>File name.</returns>
         public static string FileName(string filePath)
         {
             var slash = filePath.LastIndexOf('/');
@@ -21,6 +28,12 @@ namespace Pico.Files
             return "";
         }
 
+        /// <summary>
+        /// Returns a list of all files within a directory.
+        /// </summary>
+        /// <param name="directory">Root directory.</param>
+        /// <param name="inCludeSubDirs">Recursive?</param>
+        /// <returns></returns>
         public static string[] GetAllFilePaths(string directory, bool inCludeSubDirs = false)
         {
             List<string> result = new List<string>(64);
@@ -45,6 +58,13 @@ namespace Pico.Files
             return result.ToArray();
         }
 
+        /// <summary>
+        /// File copy operation, wrapped in a 'try' statement.
+        /// </summary>
+        /// <param name="from">From path.</param>
+        /// <param name="to">To path.</param>
+        /// <param name="overwrite">Overwrite?</param>
+        /// <returns>Copy successful.</returns>
         public static bool TryCopy(string from, string to, bool overwrite)
         {
             try
@@ -58,6 +78,16 @@ namespace Pico.Files
             }
         }
 
+
+
+        /// <summary>
+        /// Copy all files from one directory to another.
+        /// Can also multithread :)
+        /// </summary>
+        /// <param name="fromRootDirectory">From path.</param>
+        /// <param name="toRootDirectory">To path.</param>
+        /// <param name="overwrite">Overwrite?</param>
+        /// <returns></returns>
         public static void CopyAllFiles(string fromRootDirectory, string toRootDirectory, bool recursive = false, bool overwrite = false, int threadCount = 1)
         {
 
@@ -130,7 +160,11 @@ namespace Pico.Files
 
 
 
-
+        /// <summary>
+        /// Formats a file path so it's universally readable.
+        /// </summary>
+        /// <param name="path">Path.</param>
+        /// <returns>Formatted path.</returns>
         public static string FormatPath(string path)
         {
             path = path.Replace("\\", "/");
@@ -152,61 +186,67 @@ namespace Pico.Files
 
         //Woah there...  What about a string[] and a for()?
         //Way simpler, but oh well.
+        /// <summary>
+        /// Returns if the path ends with an image file extension.
+        /// </summary>
+        /// <param name="filePath">File path.</param>
+        /// <returns>File is an image.</returns>
         static bool FileIsImage(string filePath)
         {
-            string lower = filePath.ToLower();
+            filePath = filePath.ToLower();
+
             //Image file
-            if (lower.EndsWith(".jpg")) return true;
-            if (lower.EndsWith(".jpeg")) return true;
-            if (lower.EndsWith(".jfif")) return true;
-            if (lower.EndsWith(".exif")) return true;
-            if (lower.EndsWith(".tif")) return true;
-            if (lower.EndsWith(".tiff")) return true;
-            if (lower.EndsWith(".gif")) return true;
-            if (lower.EndsWith(".bmp")) return true;
-            if (lower.EndsWith(".png")) return true;
-            if (lower.EndsWith(".ppm")) return true;
-            if (lower.EndsWith(".pgm")) return true;
-            if (lower.EndsWith(".pbm")) return true;
-            if (lower.EndsWith(".pnm")) return true;
-            if (lower.EndsWith(".heif")) return true;
-            if (lower.EndsWith(".bpg")) return true;
-            if (lower.EndsWith(".deep")) return true;
-            if (lower.EndsWith(".drw")) return true;
-            if (lower.EndsWith(".ecw")) return true;
-            if (lower.EndsWith(".fits")) return true;
-            if (lower.EndsWith(".flif")) return true;
-            if (lower.EndsWith(".ico")) return true;
-            if (lower.EndsWith(".ilbm")) return true;
-            if (lower.EndsWith(".img")) return true;
-            if (lower.EndsWith(".nrrd")) return true;
-            if (lower.EndsWith(".pam")) return true;
-            if (lower.EndsWith(".pcx")) return true;
-            if (lower.EndsWith(".pgf")) return true;
-            if (lower.EndsWith(".plbm")) return true;
-            if (lower.EndsWith(".sgi")) return true;
-            if (lower.EndsWith(".sid")) return true;
-            if (lower.EndsWith(".tga")) return true;
-            if (lower.EndsWith(".xisf")) return true;
+            if (filePath.EndsWith(".jpg")) return true;
+            if (filePath.EndsWith(".jpeg")) return true;
+            if (filePath.EndsWith(".jfif")) return true;
+            if (filePath.EndsWith(".exif")) return true;
+            if (filePath.EndsWith(".tif")) return true;
+            if (filePath.EndsWith(".tiff")) return true;
+            if (filePath.EndsWith(".gif")) return true;
+            if (filePath.EndsWith(".bmp")) return true;
+            if (filePath.EndsWith(".png")) return true;
+            if (filePath.EndsWith(".ppm")) return true;
+            if (filePath.EndsWith(".pgm")) return true;
+            if (filePath.EndsWith(".pbm")) return true;
+            if (filePath.EndsWith(".pnm")) return true;
+            if (filePath.EndsWith(".heif")) return true;
+            if (filePath.EndsWith(".bpg")) return true;
+            if (filePath.EndsWith(".deep")) return true;
+            if (filePath.EndsWith(".drw")) return true;
+            if (filePath.EndsWith(".ecw")) return true;
+            if (filePath.EndsWith(".fits")) return true;
+            if (filePath.EndsWith(".flif")) return true;
+            if (filePath.EndsWith(".ico")) return true;
+            if (filePath.EndsWith(".ilbm")) return true;
+            if (filePath.EndsWith(".img")) return true;
+            if (filePath.EndsWith(".nrrd")) return true;
+            if (filePath.EndsWith(".pam")) return true;
+            if (filePath.EndsWith(".pcx")) return true;
+            if (filePath.EndsWith(".pgf")) return true;
+            if (filePath.EndsWith(".plbm")) return true;
+            if (filePath.EndsWith(".sgi")) return true;
+            if (filePath.EndsWith(".sid")) return true;
+            if (filePath.EndsWith(".tga")) return true;
+            if (filePath.EndsWith(".xisf")) return true;
 
             //Editor files
-            if (lower.EndsWith(".cd5")) return true;
-            if (lower.EndsWith(".cpt")) return true;
-            if (lower.EndsWith(".kra")) return true;
-            if (lower.EndsWith(".mdp")) return true;
-            if (lower.EndsWith(".pdn")) return true;
-            if (lower.EndsWith(".psd")) return true;
-            if (lower.EndsWith(".psp")) return true;
-            if (lower.EndsWith(".sai")) return true;
-            if (lower.EndsWith(".xcf")) return true;
+            if (filePath.EndsWith(".cd5")) return true;
+            if (filePath.EndsWith(".cpt")) return true;
+            if (filePath.EndsWith(".kra")) return true;
+            if (filePath.EndsWith(".mdp")) return true;
+            if (filePath.EndsWith(".pdn")) return true;
+            if (filePath.EndsWith(".psd")) return true;
+            if (filePath.EndsWith(".psp")) return true;
+            if (filePath.EndsWith(".sai")) return true;
+            if (filePath.EndsWith(".xcf")) return true;
 
             //Vector Images
-            if (lower.EndsWith(".cgm")) return true;
-            if (lower.EndsWith(".svg")) return true;
-            if (lower.EndsWith(".cdr")) return true;
+            if (filePath.EndsWith(".cgm")) return true;
+            if (filePath.EndsWith(".svg")) return true;
+            if (filePath.EndsWith(".cdr")) return true;
 
             //PDF
-            if (lower.EndsWith(".pdf")) return true;
+            if (filePath.EndsWith(".pdf")) return true;
 
             return false;
         }
