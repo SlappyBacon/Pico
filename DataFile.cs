@@ -96,7 +96,7 @@ namespace Pico.Data
             List<string> lines = new List<string>();
             foreach (Type type in data.Keys)
             {
-                foreach (string name in data[type].Keys)
+                foreach (string name in data[type].Keys.ToArray())
                 {
                     stringBuilder.Append(type.FullName);
                     stringBuilder.Append('■');
