@@ -13,11 +13,10 @@ namespace Pico.Data
     /// use / modify them, and save them if desired.
     /// NOTE: Not all non-primitives types are supported.
     /// </summary>
-    struct DataFile
+    class DataFile
     {
         //Type, Name, Value
         static Dictionary<Type, Dictionary<string, object>> data = new Dictionary<Type, Dictionary<string, object>>();
-
 
 
         /// <summary>
@@ -64,6 +63,12 @@ namespace Pico.Data
             return true;
         }
 
+
+
+        
+
+
+
         /// <summary>
         /// Save data to disk.
         /// </summary>
@@ -74,10 +79,21 @@ namespace Pico.Data
             //if file exists, backup.  Overwrite old backup
             if (File.Exists(path)) File.Move(path, $"{path}.backup", true);
 
-            //convert variables to text to write to file
-            //type,name,value
+            var lines = ToLines();
+
+            //write data to file
+            File.WriteAllLines(path, lines);
+            return true;
+        }
+        /// <summary>
+        /// convert variables to text to write to file
+        /// type,name,value
+        /// </summary>
+        /// <returns></returns>
+        public string[] ToLines()
+        {
             StringBuilder stringBuilder = new StringBuilder();
-            List<string> fileLines = new List<string>();
+            List<string> lines = new List<string>();
             foreach (Type type in data.Keys)
             {
                 foreach (string name in data[type].Keys)
@@ -87,35 +103,41 @@ namespace Pico.Data
                     stringBuilder.Append(name);
                     stringBuilder.Append('■');
                     stringBuilder.Append(data[type][name]);
-                    fileLines.Add(stringBuilder.ToString());
+                    lines.Add(stringBuilder.ToString());
                     stringBuilder.Clear();
                 }
             }
-
-            //write data to file
-            File.WriteAllLines(path, fileLines.ToArray());
-            return true;
+            return lines.ToArray();
         }
         /// <summary>
         /// Load data from disk.
         /// </summary>
         /// <param name="path">Load file path.</param>
         /// <returns></returns>
-        public bool Load(string path)
+        public bool LoadFromFile(string path)
         {
             //check if file exists
             if (!File.Exists(path)) return false;
 
             //load file lines
-            string[] fileLines = File.ReadAllLines(path);
+            string[] lines = File.ReadAllLines(path);
 
+            return LoadFromLines(lines);
+        }
+        /// <summary>
+        /// Load data from disk.
+        /// </summary>
+        /// <param name="lines">Load file path.</param>
+        /// <returns></returns>
+        public bool LoadFromLines(string[] lines)
+        {
             //create new data set
             Dictionary<Type, Dictionary<string, object>> newData = new Dictionary<Type, Dictionary<string, object>>();
 
             //populate data
-            foreach (string line in fileLines)
+            foreach (string line in lines)
             {
-                //Try to get data from file line (TRY CATCH ALL?)
+                //Try to get data from file line
                 try
                 {
                     //Find splits
@@ -140,7 +162,7 @@ namespace Pico.Data
                 }
                 catch
                 {
-                    Console.WriteLine($"Failed to load data from: {line}");
+                    
                 }
             }
 
@@ -149,6 +171,14 @@ namespace Pico.Data
 
             return true;
         }
+
+
+
+
+
+
+
+
 
         #region Non-Primitives
         public object TextToType(string text, Type toType)
