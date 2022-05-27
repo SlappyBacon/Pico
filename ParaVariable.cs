@@ -12,10 +12,11 @@ namespace Pico.Threads
         object value = null;
         Thread thread = null;
 
-        //Add support for input parameters
-
-
-
+        /// <summary>
+        /// Define the function to be performed, and it's input arg.
+        /// </summary>
+        /// <param name="function">Must take in an object, and return an object.</param>
+        /// <param name="args">Object to pass into the function.</param>
         public ParaVariable(object function, object args)
         {
             thread = new Thread(new ParameterizedThreadStart(ThreadAction));

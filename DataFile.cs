@@ -77,7 +77,7 @@ namespace Pico.Data
         public bool Save(string path)
         {
             //if file exists, backup.  Overwrite old backup
-            if (File.Exists(path)) File.Move(path, $"{path}.backup", true);
+            if (File.Exists(path)) File.Move(path, $"{path}.dbkp", true);
 
             var lines = ToLines();
 
