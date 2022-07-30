@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
-using System.Numerics;
 using System.Text;
 using System.Threading;
 
@@ -16,26 +15,25 @@ namespace Pico.Networking
     /// A tool which allows you to communicate
     /// with other computers over a network easily
     /// via TCP.  This class contains many 
-    /// useful tools for reading/writing raw data.
+    /// useful tools for reading/writing encrypted data.
     /// </summary>
-    public class NetCom : IDisposable
+    public class EncryptedNetCom : IDisposable
     {
-        public string IpAddress { get { return IpTools.ClientIp(client); } }
-        TcpClient client = null;
-        NetworkStream stream = null;
+        public string IpAddress => netCom.IpAddress;
+        NetCom netCom;
+        static byte[] key = new byte[256];
         #region Constructors & Disposal
         /// <summary>
         /// Listen for connection request at 'port'
         /// </summary>
         /// <param name="port"></param>
-        public NetCom(int port)
+        public EncryptedNetCom(int port)
         {
             //Get client
-            TcpListener listener = new TcpListener(port);
-            listener.Start();
-            client = listener.AcceptTcpClient();
-            listener.Stop();
-            Setup(client);
+            netCom = new NetCom(port);
+            //Set first key
+            SetNewKey();
+
         }
 
         /// <summary>
@@ -44,48 +42,33 @@ namespace Pico.Networking
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="port"></param>
-        public NetCom(string ip, int port)
-        {
-            GetTcpClient(ip,port);
-            Setup(client);
-        }
-
-
-
-        bool GetTcpClient(string ip, int port)
+        public EncryptedNetCom(string ip, int port)
         {
             //Get client
-            try
-            {
-                client = new TcpClient(ip, port);
-                return true;
-            }
-            catch
-            {
-                client = null;
-                return false;
-            }
-        }
+            netCom = new NetCom(ip, port);
 
-
-        bool Setup(TcpClient client)
-        {
-            if (client == null) return false;
-            try
-            {
-                stream = client.GetStream();
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            //Get first key
+            GetNewKey();
         }
-        
         public void Dispose()
         {
-            if (client != null) client.Dispose();
-            if (stream != null) stream.Dispose();
+            netCom.Dispose();
+        }
+        #endregion
+        #region Set / Get New Key
+        void SetNewKey()
+        {
+            for (int i = 0; i < key.Length;)
+            {
+                key[i] = (byte)Random.Shared.Next(0, 256);  //Random byte
+                i++;
+            }
+            netCom.WriteByteArray(key);
+        }
+        void GetNewKey()
+        {
+            var newKey = netCom.ReadByteArray();
+            key = newKey;
         }
         #endregion
         #region Read / Write Text
@@ -98,41 +81,43 @@ namespace Pico.Networking
         {
             //Early return
             if (text == null) return false;
-            if (stream == null) return false;
+            if (netCom == null) return false;
 
             //Convert text to bytes
             byte[] bytes = Encoding.UTF8.GetBytes(text);
 
-            //Write bytes count
-            var wroteCount = StreamTools.WriteInt(stream, bytes.Length);
-            if (!wroteCount) return false;
+            //Encrypt bytes
+            bytes = ByteCryptor.Encrypt(bytes, key);
 
             //Write encrypted bytes
-            var wroteMsg = StreamTools.WriteBytes(stream, bytes);
+            var wroteMsg = netCom.WriteByteArray(bytes);
             if (!wroteMsg) return false;
+
+            //Generate new key
+            SetNewKey();
             return true;
         }
         /// <summary>
         /// Read text from the stream.
         /// </summary>
         /// <returns></returns>
-        public string ReadText(int maxLength = -1)
+        public string ReadText()
         {
             //Early return
-            if (stream == null) return null;
+            if (netCom == null) return null;
 
-            //Read count
-            int count = StreamTools.ReadInt(stream);
-
-            //Check if count is too big (TEST)
-            if (maxLength > 0 && count > maxLength) return null;
-
-            //Read bytes
-            var bytes = StreamTools.ReadBytes(stream, count);
+            //Read encrypted bytes
+            var bytes = netCom.ReadByteArray();
             if (bytes == null) return null;
+
+            //Decrypt bytes
+            bytes = ByteCryptor.Decrypt(bytes, key);
 
             //Convert bytes to text
             var result = Encoding.UTF8.GetString(bytes);
+
+            //Get new key
+            GetNewKey();
             return result;
         }
         #endregion
@@ -145,13 +130,19 @@ namespace Pico.Networking
         public bool WriteInt(int number)
         {
             //Early return
-            if (stream == null) return false;
+            if (netCom == null) return false;
 
             //Convert int to bytes
             byte[] bytes = BitConverter.GetBytes(number);
+            
+            //Encrypt bytes
+            bytes = ByteCryptor.Encrypt(bytes, key);
 
             //Write encrypted bytes
-            StreamTools.WriteBytes(stream, bytes);
+            netCom.WriteByteArray(bytes);
+
+            //Generate new key
+            SetNewKey();
             return true;
         }
         /// <summary>
@@ -161,13 +152,19 @@ namespace Pico.Networking
         public int ReadInt()
         {
             //Early return
-            if (stream == null) return 0;
+            if (netCom == null) return 0;
 
-            //Read bytes
-            byte[] bytes = StreamTools.ReadBytes(stream, 4);
+            //Read encrypted bytes
+            byte[] bytes = netCom.ReadByteArray();
+
+            //Decrypt bytes
+            bytes = ByteCryptor.Decrypt(bytes, key);
 
             //Convert bytes to type
             var result = BitConverter.ToInt32(bytes);
+
+            //Get new key
+            GetNewKey();
             return result;
         }
         #endregion
@@ -180,13 +177,19 @@ namespace Pico.Networking
         public bool WriteLong(long number)
         {
             //Early return
-            if (stream == null) return false;
+            if (netCom == null) return false;
 
             //Convert type to bytes
             byte[] bytes = BitConverter.GetBytes(number);
 
-            //Write bytes
-            StreamTools.WriteBytes(stream, bytes);
+            //Encrypt bytes
+            bytes = ByteCryptor.Encrypt(bytes, key);
+
+            //Write encrypted bytes
+            netCom.WriteByteArray(bytes);
+
+            //Generate new key
+            SetNewKey();
             return true;
         }
         /// <summary>
@@ -196,13 +199,19 @@ namespace Pico.Networking
         public long ReadLong()
         {
             //Early return
-            if (stream == null) return 0;
+            if (netCom == null) return 0;
 
-            //Read bytes
-            byte[] bytes = StreamTools.ReadBytes(stream, 8);
+            //Read encrypted bytes
+            byte[] bytes = netCom.ReadByteArray();
 
-            //Convert to type
+            //Decrypt bytes
+            bytes = ByteCryptor.Decrypt(bytes, key);
+
+            //Convert bytes to type
             long result = BitConverter.ToInt64(bytes);
+
+            //Get new key
+            GetNewKey();
             return result;
         }
         #endregion
@@ -216,13 +225,16 @@ namespace Pico.Networking
         {
             //Early return
             if (bytes == null) return false;
-            if (stream == null) return false;
+            if (netCom == null) return false;
 
-            //Write buffer size
-            StreamTools.WriteInt(stream, bytes.Length);
+            //Encrypt bytes
+            bytes = ByteCryptor.Encrypt(bytes, key);
 
-            //Write bytes
-            StreamTools.WriteBytes(stream, bytes);
+            //Write encrypted bytes
+            netCom.WriteByteArray(bytes);
+
+            //Generate new key
+            SetNewKey();
             return true;
         }
         /// <summary>
@@ -232,11 +244,13 @@ namespace Pico.Networking
         public byte[] ReadByteArray()
         {
             //Early return
-            if (stream == null) return null;
-            //Read buffer size
-            int bufferSize = StreamTools.ReadInt(stream);
-            //Read bytes
-            var bytes = StreamTools.ReadBytes(stream, bufferSize);
+            if (netCom == null) return null;
+            //Read encrypted bytes
+            var bytes = netCom.ReadByteArray();
+            //Decrypt bytes
+            bytes = ByteCryptor.Decrypt(bytes, key);
+            //Get new key
+            GetNewKey();
             return bytes;
         }
         #endregion
@@ -250,7 +264,7 @@ namespace Pico.Networking
         {
 
             //Early return
-            if (stream == null || array == null) return false;
+            if (netCom == null || array == null) return false;
             if (array.Length < 1) return false;
 
             //Convert int[] to bytes
@@ -269,11 +283,14 @@ namespace Pico.Networking
                 i++;
             }
 
-            //Write buffer size
-            StreamTools.WriteInt(stream, buffer.Length);
+            //Encrypt bytes
+            buffer = ByteCryptor.Encrypt(buffer, key);
 
-            //Write bytes
-            StreamTools.WriteBytes(stream, buffer);
+            //Write Encrypted Bytes
+            netCom.WriteByteArray(buffer);
+
+            //Generate new key
+            SetNewKey();
             return true;
         }
 
@@ -286,18 +303,17 @@ namespace Pico.Networking
         {
 
             //Early return
-            if (stream == null) return null;
+            if (netCom == null) return null;
 
-            //Read count
-            int bufferLength = StreamTools.ReadInt(stream);
-            if (bufferLength < 1) return null;
-
-            //Read bytes
-            byte[] buffer = StreamTools.ReadBytes(stream, bufferLength); //4 bytes for each int
+            //Read encrypted bytes
+            byte[] buffer = netCom.ReadByteArray(); //4 bytes for each int
             if (buffer == null) return null;
 
+            //Decrypt bytes
+            buffer = ByteCryptor.Decrypt(buffer, key);
+
             //Convert bytes to int[]
-            int[] array = new int[bufferLength / 4];
+            int[] array = new int[buffer.Length / 4];
             byte[] numBytes = new byte[4];
             for (int i = 0; i < array.Length;)
             {
@@ -312,6 +328,9 @@ namespace Pico.Networking
                 array[i] = BitConverter.ToInt32(numBytes);
                 i++;
             }
+
+            //Get new key
+            GetNewKey();
             return array;
         }
         #endregion
