@@ -12,7 +12,8 @@ namespace Pico.Networking
         int port;
         bool running = false;
         Thread runThread = null;
-        Action<NetCom> serveAction;
+        object serveAction = null;  //Action<NetCom or EncryptedNetCom>
+
 
 
 
@@ -21,13 +22,19 @@ namespace Pico.Networking
             this.port = port;
             this.serveAction = serveAction;
         }
-
+        public NetComServer(int port, Action<EncryptedNetCom> serveAction)
+        {
+            this.port=port;
+            this.serveAction = serveAction;
+        }
 
 
         public void Start()
         {
+            //Begin Start
             if (running) return;
             running = true;
+            //Create Thread
             runThread = new Thread(RunThreadAction);
             runThread.Start();
         }
@@ -38,18 +45,36 @@ namespace Pico.Networking
             {
                 if (!running) break;
                 //Serve next request
-                using (NetCom com = new NetCom(port))
+
+                //Raw
+                if (serveAction is Action<NetCom>)
                 {
-                    serveAction(com);
+                    var action = serveAction as Action<NetCom>;
+                    using (NetCom com = new NetCom(port))
+                    {
+                        action(com);
+                    }
+                }
+                //Encrypted
+                else if (serveAction is Action<EncryptedNetCom>)
+                {
+                    var action = serveAction as Action<EncryptedNetCom>;
+                    using (EncryptedNetCom com = new EncryptedNetCom(port))
+                    {
+                        action(com);
+                    }
                 }
             }
         }
 
         public void Stop()
         {
+            //Begin stop
             if (!running) return;
             running = false;
-            new NetCom(IpTools.MyLocalIp(), port);
+            //Poke thread
+            new NetCom(IpTools.MyLocalIp(), port).Dispose();
+            //Join
             ThreadTools.JoinThread(runThread);
         }
 

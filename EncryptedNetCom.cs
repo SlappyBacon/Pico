@@ -58,6 +58,7 @@ namespace Pico.Networking
         #region Set / Get New Key
         void SetNewKey()
         {
+            if (key == null) return;
             for (int i = 0; i < key.Length;)
             {
                 key[i] = (byte)Random.Shared.Next(0, 256);  //Random byte
@@ -112,6 +113,7 @@ namespace Pico.Networking
 
             //Decrypt bytes
             bytes = ByteCryptor.Decrypt(bytes, key);
+            if (bytes == null) return null;
 
             //Convert bytes to text
             var result = Encoding.UTF8.GetString(bytes);
@@ -156,9 +158,11 @@ namespace Pico.Networking
 
             //Read encrypted bytes
             byte[] bytes = netCom.ReadByteArray();
+            if (bytes == null) return 0;
 
             //Decrypt bytes
             bytes = ByteCryptor.Decrypt(bytes, key);
+            if (bytes == null) return 0;
 
             //Convert bytes to type
             var result = BitConverter.ToInt32(bytes);
@@ -206,6 +210,7 @@ namespace Pico.Networking
 
             //Decrypt bytes
             bytes = ByteCryptor.Decrypt(bytes, key);
+            if (bytes == null) return 0;
 
             //Convert bytes to type
             long result = BitConverter.ToInt64(bytes);
@@ -311,6 +316,7 @@ namespace Pico.Networking
 
             //Decrypt bytes
             buffer = ByteCryptor.Decrypt(buffer, key);
+            if (buffer == null) return null;
 
             //Convert bytes to int[]
             int[] array = new int[buffer.Length / 4];

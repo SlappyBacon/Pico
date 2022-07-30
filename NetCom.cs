@@ -165,6 +165,7 @@ namespace Pico.Networking
 
             //Read bytes
             byte[] bytes = StreamTools.ReadBytes(stream, 4);
+            if (bytes == null) return 0;
 
             //Convert bytes to type
             var result = BitConverter.ToInt32(bytes);
@@ -200,6 +201,7 @@ namespace Pico.Networking
 
             //Read bytes
             byte[] bytes = StreamTools.ReadBytes(stream, 8);
+
 
             //Convert to type
             long result = BitConverter.ToInt64(bytes);

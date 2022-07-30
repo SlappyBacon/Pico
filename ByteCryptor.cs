@@ -20,11 +20,9 @@ public static class ByteCryptor
     /// <returns></returns>
     public static byte[] Encrypt(byte[] bytes, byte[] key, int keyIndex = 0)
     {
+        if (bytes == null || key == null || bytes.Length == 0 || key.Length == 0) return null;
+
         if (keyIndex < 0 || keyIndex >= key.Length) keyIndex = 0;
-        if (bytes == null || key == null || bytes.Length == 0 || key.Length == 0)
-        {
-            return null;
-        }
 
         int newByte;
         for (int i = 0; i < bytes.Length;)
