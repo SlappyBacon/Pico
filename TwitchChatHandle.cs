@@ -1,28 +1,25 @@
-﻿using System;
+﻿using Pico.Threads;
+using System;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Pico.Twitch
 {
-    public class TwitchChatHandle
+    public class TwitchChatHandle : IDisposable
     {
-        //VERSION 2
-
-        //BE SURE TO GIVE YOUR BOT MODERATOR
+        //BE SURE TO GIVE YOUR BOT'S TWITCH ACCOUNT MODERATOR
         //SOME FUNCTIONS MAY NOT WORK OTHERWISE
+        //OAuth token can be retrieved from https://twitchapps.com/tmi/
 
-        //OAuth can be retrieved from https://twitchapps.com/tmi/
-
-        //MAKE IDISPOSABLE
-        //AND EXIT THREAD :)
-
+        bool exit = false;
         string channel;
 
         TcpClient tcpClient;
         StreamReader inputStream;
         StreamWriter outputStream;
+
+        Thread pingThread;
 
         /// <summary>
         /// Allows you to read and write Twitch chat messages.
@@ -43,7 +40,9 @@ namespace Pico.Twitch
             outputStream.WriteLine($"JOIN #{channel}");
             outputStream.Flush();
 
-            Task.Run(() => Ping());
+
+            pingThread = new Thread(() => AutoPing());
+            pingThread.Start();
         }
 
         /// <summary>
@@ -52,27 +51,34 @@ namespace Pico.Twitch
         /// <returns></returns>
         public TwitchChatEntry Read()
         {
-            string chatEntry;
-        retry:
-            try
+            string read;
+            while (true)
             {
-                chatEntry = inputStream.ReadLine();
+                if (exit) return null;
+
+                read = TcpRead();
+                if (read == null)
+                {
+                    Thread.Sleep(100);  //CPU says thank you :)
+                    continue;
+                }
+                if (!read.Contains("PRIVMSG")) continue;
+
+                break; //Valid chat entry data
             }
-            catch
-            {
-                goto retry;
-            }
-            if (chatEntry == null || !chatEntry.Contains("PRIVMSG")) goto retry;       //Not Chat Message
+
+            //Parse TwitchChatEntry from read
 
             //Get sender's name
-            int startIndex = chatEntry.IndexOf(":") + 1;
-            int endIndex = chatEntry.IndexOf("!");
+            int startIndex = read.IndexOf(":") + 1;
+            int endIndex = read.IndexOf("!");
             int length = endIndex - startIndex;
-            string chatSender = chatEntry.Substring(startIndex, length);
+            string chatSender = read.Substring(startIndex, length);
 
             //Get chat message
-            startIndex = chatEntry.IndexOf(":", 1) + 1;
-            string chatMessage = chatEntry.Substring(startIndex);
+            startIndex = read.IndexOf(":", 1) + 1;
+            string chatMessage = read.Substring(startIndex);
+
             return new TwitchChatEntry(chatSender,chatMessage);
         }
 
@@ -80,35 +86,76 @@ namespace Pico.Twitch
         /// Writes a message to chat.
         /// </summary>
         /// <param name="chatMessage">Message to write.</param>
-        public void Write(string chatMessage)
+        public bool Write(string chatMessage)
         {
-            Send($":bot!bot@bot.tmi.twitch.tv PRIVMSG #{channel} :{chatMessage}");
+            return TcpWrite($":bot!bot@bot.tmi.twitch.tv PRIVMSG #{channel} :{chatMessage}");
         }
 
-        void Send(string text)    //Sends data via TCP (Doesn't print to chat)
+        string TcpRead()
         {
-        retry:
+            try
+            {
+                return inputStream.ReadLine();
+            }
+            catch
+            {
+                return null;
+
+            }
+        }
+
+        bool TcpWrite(string text)
+        {
             try
             {
                 outputStream.WriteLine(text);
                 outputStream.Flush();
+                return true;
             }
             catch
             {
-                goto retry;
+                return false;
             }
         }
 
-        void Ping()     //Pings server every 5 minutes to prevent disconnection
+        void AutoPing()     //Prevents getting disconnected from server-side   
         {
             while (true)
             {
-                Send("PING irc.twitch.tv");
-                Thread.Sleep(TimeSpan.FromMinutes(5));
+                if (exit) return;
+
+                //Send ping to server
+                var success = TcpWrite("PING irc.twitch.tv");
+
+                //Check if ping failed
+                if (!success)
+                {
+                    Thread.Sleep(100);
+                    continue;   //Try again
+                }
+                //Ping successful
+
+                //Wait for 5 minutes
+                //Check if exit every second
+                for (int i = 0; i < 300; i++)
+                {
+                    if (exit) return;
+                    Thread.Sleep(1000);         
+                    i++;
+                }
+                
             }
+
         }
+
+        public void Dispose()
+        {
+            exit = true;
+            ThreadTools.JoinThread(pingThread);
+        }
+
     }
-    public struct TwitchChatEntry
+    public class TwitchChatEntry
     {
         public string sender;
         public string message;
