@@ -77,31 +77,5 @@ namespace Pico.Maths
         {
             return number % 2 == 0;
         }
-
-
-
-        /// <summary>
-        /// Calculates the amount of each payment.
-        /// </summary>
-        /// <param name="loan">Loan amount.</param>
-        /// <param name="annualInterestRate">Percent.</param>
-        /// <param name="totalPayments">Total number of payments.</param>
-        /// <param name="annualPayments">Number of payments per annua.</param>
-        /// <returns>Payment total.</returns>
-        public static double Finance(double loan, double annualInterestRate, int totalPayments = 12, int annualPayments = 12)
-        {
-            double paymentInterestRate = annualInterestRate / annualPayments;
-            double paymentPrinciple = loan / totalPayments;
-            double totalPaid = 0;
-            for (int i = 0; i < totalPayments; i++)
-            {
-                double paymentInterestAmount = loan * paymentInterestRate;
-                double payment = paymentPrinciple + paymentInterestAmount;
-                loan -= paymentPrinciple;
-                totalPaid += payment;
-            }
-            return totalPaid / totalPayments;
-        }
-
     }
 }
