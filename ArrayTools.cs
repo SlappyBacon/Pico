@@ -8,10 +8,6 @@ namespace Pico.Arrays
     /// </summary>
 	public static class ArrayTools
     {
-
-        
-
-        
         /// <summary>
         /// Compares two arrays, and returns if
         /// they are the same.

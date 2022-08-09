@@ -76,47 +76,79 @@ namespace Pico.Print
         }
 
         /// <summary>
-        /// Prints a byte array.
+        /// Prints an array.
         /// </summary>
-        /// <param name="bytes">Bytes to print.</param>
-        public static void Array(byte[] bytes) //Add more types?
+        /// <param name="array">Array to print.</param>
+        /// <param name="vertical">False = horizontal</param>
+        public static void Array(object array, bool vertical = false) //Add more types?
         {
-            if (bytes == null)
+            if (array == null)
             {
                 Console.WriteLine("[null]");
                 return;
             }
+
             StringBuilder sb = new StringBuilder();
-            sb.Append('[');
-            for (int i = 0; i < bytes.Length;)
+            if (!vertical) sb.Append('[');
+
+            switch (array)
             {
-                if (i < bytes.Length - 1) sb.Append($"{bytes[i]},");
-                else sb.Append(bytes[i]);
-                i++;
+                //ADD MORE TYPES, uint, ulong, ect...
+                case string[]:
+                    var lines = (string[])array;
+                    foreach (string b in lines)
+                    {
+                        if (vertical) sb.Append($"{b},\n");
+                        else sb.Append($"{b},");
+                    }
+                    break;
+                case byte[]:
+                    var bytes = (byte[])array;
+                    foreach (byte b in bytes)
+                    {
+                        if (vertical) sb.Append($"{b},\n");
+                        else sb.Append($"{b},");
+                    }
+                    break;
+                case int[]:
+                    var ints = (int[])array;
+                    foreach (int num in ints)
+                    {
+                        if (vertical) sb.Append($"{num},\n");
+                        else sb.Append($"{num},");
+                    }
+                    break;
+                case long[]:
+                    var longs = (long[])array;
+                    foreach (int num in longs)
+                    {
+                        if (vertical) sb.Append($"{num},\n");
+                        else sb.Append($"{num},");
+                    }
+                    break;
+                case float[]:
+                    var floats = (long[])array;
+                    foreach (int num in floats)
+                    {
+                        if (vertical) sb.Append($"{num},\n");
+                        else sb.Append($"{num},");
+                    }
+                    break;
+                case double[]:
+                    var doubles = (long[])array;
+                    foreach (int num in doubles)
+                    {
+                        if (vertical) sb.Append($"{num},\n");
+                        else sb.Append($"{num},");
+                    }
+                    break;
             }
-            sb.Append(']');
-            Console.WriteLine(sb.ToString());
-        }
-        /// <summary>
-        /// Prints an int array.
-        /// </summary>
-        /// <param name="nums">Ints to print.</param>
-        public static void Array(int[] nums)
-        {
-            if (nums == null)
+            if (sb.Length > 0)
             {
-                Console.WriteLine("[null]");
-                return;
+                if (vertical) sb.Remove(sb.Length - 2, 2); //Trim ",\n" off the end
+                else sb.Remove(sb.Length - 1, 1); //Trim "," off the end
             }
-            StringBuilder sb = new StringBuilder();
-            sb.Append('[');
-            for (int i = 0; i < nums.Length;)
-            {
-                if (i < nums.Length - 1) sb.Append($"{nums[i]},");
-                else sb.Append(nums[i]);
-                i++;
-            }
-            sb.Append(']');
+            if (!vertical) sb.Append(']');
             Console.WriteLine(sb.ToString());
         }
 

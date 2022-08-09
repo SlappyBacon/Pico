@@ -13,10 +13,10 @@ namespace Pico.Networking
     {
         /// <summary>
         /// Get an array of local ip addresses on your current local network.
-        /// Not 100% stable...
+        /// Not working...
         /// </summary>
         /// <returns></returns>
-        public static string[] GetLocalDeviceIps()
+        static string[] GetLocalDeviceIps()
         {
             string[] possibleIps = new string[256];
 
