@@ -1,6 +1,7 @@
 ﻿using Pico.Arrays;
 using Pico.Conversion;
 using Pico.Cryptography;
+using Pico.Files;
 using Pico.Streams;
 using System;
 using System.Collections.Generic;
@@ -340,5 +341,19 @@ namespace Pico.Networking
             return array;
         }
         #endregion
+
+        public bool WriteFile(string file)
+        {
+            var success = StreamTools.EncryptedWriteFile(netCom.Stream, file, key);
+            SetNewKey();
+            return success;
+        }
+        public bool ReadFile(string file)
+        {
+            var success = StreamTools.EncryptedReadFile(netCom.Stream, file, key);
+            GetNewKey();
+            return success;
+        }
+
     }
 }

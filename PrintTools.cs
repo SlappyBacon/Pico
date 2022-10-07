@@ -228,7 +228,6 @@ namespace Pico.Print
 
 
             Console.Beep(1000, 100);
-            Console.Beep(1000, 100);
             Console.ReadLine();
 
 

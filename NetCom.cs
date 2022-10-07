@@ -20,6 +20,7 @@ namespace Pico.Networking
     /// </summary>
     public class NetCom : IDisposable
     {
+        public Stream Stream { get { return stream; } }
         public string IpAddress { get { return IpTools.ClientIp(client); } }
         TcpClient client = null;
         NetworkStream stream = null;
@@ -123,9 +124,6 @@ namespace Pico.Networking
 
             //Read count
             int count = StreamTools.ReadInt(stream);
-
-            //Check if count is too big (TEST)
-            if (maxLength > 0 && count > maxLength) return null;
 
             //Read bytes
             var bytes = StreamTools.ReadBytes(stream, count);
@@ -317,5 +315,15 @@ namespace Pico.Networking
             return array;
         }
         #endregion
+
+        public bool WriteFile(string file)
+        {
+            return StreamTools.WriteFile(stream, file);
+        }
+        public bool ReadFile(string file)
+        {
+            return StreamTools.ReadFile(stream, file);
+        }
+
     }
 }

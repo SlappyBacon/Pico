@@ -7,11 +7,29 @@ namespace Pico.Threads
     /// Runs a function on a seperate thread, which
     /// updates the value apon completion.
     /// </summary>
-    class ParaVariable
+    class ParaVariable : IDisposable
     {
         object value = null;
         Thread thread = null;
-
+        bool joined = false;
+        /// <summary>
+        /// Waits for function to complete,
+        /// then returns value as an object.
+        /// </summary>
+        /// <returns></returns>
+        public object Value 
+        { 
+            get 
+            {
+                if (!joined) ThreadTools.JoinThread(thread);
+                joined = true;
+                return value;
+            }
+        }
+        public bool IsFinished
+        {
+            get { return thread == null || !thread.IsAlive; }
+        }
         /// <summary>
         /// Define the function to be performed, and it's input arg.
         /// </summary>
@@ -29,16 +47,12 @@ namespace Pico.Threads
             ThreadData data = (ThreadData)args;
             value = data.Function(data.Args);
         }
-        /// <summary>
-        /// Waits for function to complete,
-        /// then returns value as an object.
-        /// </summary>
-        /// <returns></returns>
-        public object Get()
+        
+        public void Dispose()
         {
-            ThreadTools.JoinThread(thread);
-            return value;
+            if (!joined) ThreadTools.JoinThread(thread);
         }
+
         struct ThreadData
         {
             public Func<object, object> Function;

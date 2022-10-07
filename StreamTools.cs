@@ -1,8 +1,11 @@
-﻿using System;
+﻿using Pico.Cryptography;
+using Pico.Files;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pico.Streams
@@ -12,6 +15,8 @@ namespace Pico.Streams
     /// </summary>
     public static class StreamTools
     {
+        static int bufferSize = 1048576 * 8; //1mb * megabytes
+
         #region Read / Write Text
         /// <summary>
         /// Write text to the stream.
@@ -249,104 +254,165 @@ namespace Pico.Streams
             }
         }
         #endregion
-        #region Read / Write File
-        /// <summary>
-        /// Pipe bytes from file to a stream
-        /// </summary>
-        /// <param name="stream">Pipe into this stream</param>
-        /// <param name="readFilePath">Path to read from</param>
-        /// <param name="bufferSize">Buffer size of each 'chunk'.  Smaller chunks take longer, but also use less memory.</param>
-        /// <returns></returns>
-        public static bool WriteFile(Stream stream, string readFilePath, int bufferSize = 1000)
+        #region Write / Read File
+        public static bool WriteFile(Stream stream, string file)
         {
-            if (stream == null) return false;
+            file = FileTools.FormatPath(file);
+            if (!File.Exists(file)) return false;
 
-            FileInfo info = new FileInfo(readFilePath);
-            //Write a long to indicate file size in bytes
-            var sentLength = WriteLong(stream, info.Length);
-            Console.WriteLine(info.Length);
-            if (info.Length < 1 || !sentLength) return false;
+            long fileSize = new FileInfo(file).Length;
 
-            bool piped;
-            using (FileStream fileReader = new FileStream(readFilePath, FileMode.Open, FileAccess.Read))
-            {
-                Console.WriteLine("starting pipe");
-                piped = Pipe(fileReader, stream, info.Length, bufferSize);
-            }
-            Console.WriteLine($"piped: {piped}");
-            return piped;
-        }
-        /// <summary>
-        /// Pipe bytes from stream to file
-        /// </summary>
-        /// <param name="stream">Pipe from this stream</param>
-        /// <param name="writeFilePath">Path to write to</param>
-        /// <param name="bufferSize">Buffer size of each 'chunk'.  Smaller chunks take longer, but also use less memory.</param>
-        /// <returns></returns>
-        public static bool ReadFile(Stream stream, string writeFilePath, int bufferSize = 1000)
-        {
-            if (stream == null) return false;
+            //Send file size
+            bool wroteFileSize = StreamTools.WriteLong(stream, fileSize);
 
-            //Read a long to indicate file size in bytes
-            var length = ReadLong(stream);
-            Console.WriteLine(length);
-            if (length < 1) return false;
-
-            bool piped;
-            using (FileStream fileWriter = new FileStream(writeFilePath, FileMode.Create, FileAccess.Write))
-            {
-                piped = Pipe(stream, fileWriter, length, bufferSize);
-            }
-            return piped;
-        }
-        #endregion
-        #region Pipe
-        /// <summary>
-        /// Pipe bytes from one stream to another.
-        /// </summary>
-        /// <param name="fromStream">Read bytes from this stream</param>
-        /// <param name="toStream">Write bytes to this stream</param>
-        /// <param name="count">Number of bytes to pipe</param>
-        /// <param name="bufferSize">Buffer size of each 'chunk'.  Smaller chunks take longer, but also use less memory.</param>
-        /// <returns></returns>
-        public static bool Pipe(Stream fromStream, Stream toStream, long count = 1, int bufferSize = 1)
-        {
-            //Count is also the remaining bytes
-            
-            if (fromStream == null || toStream == null) return false;
-            if (count < 1 || bufferSize < 1) return false;
-
-            if (bufferSize > count) bufferSize = (int)count;//No sense wasting memory
-
-            try
+            using (FileStream readStream = new FileStream(file, FileMode.Open, FileAccess.Read))
             {
                 byte[] buffer = new byte[bufferSize];
-                while (true)
+
+                try
                 {
-                    Console.WriteLine("tick");
-                    if (count < buffer.Length)
+                    //Write all file bytes to stream, in chunks
+                    while (true)
                     {
-                        Console.WriteLine("less");
-                        fromStream.Read(buffer, 0, (int)count);
-                        toStream.Write(buffer, 0, (int)count);
-                        count -= (int)count;  //the end
+                        //Read bytes chunk from file
+                        int readByteCount = readStream.Read(buffer, 0, buffer.Length);
+                        if (readByteCount == 0) break;
+
+                        //Write bytes chunk to stream
+                        stream.Write(buffer, 0, readByteCount);
+
+                        Thread.Sleep(10);
                     }
-                    else
-                    {
-                        Console.WriteLine("more");
-                        fromStream.Read(buffer, 0, buffer.Length);
-                        toStream.Write(buffer, 0, buffer.Length);
-                        count -= buffer.Length;
-                    }
-                    
-                    if (count == 0) break;
                 }
-                return true;
+                catch { return false; }
             }
-            catch
+            return true;
+        }
+
+        //Add long? override for max file size
+        public static bool ReadFile(Stream stream, string file)
+        {
+            //Get file size from sender
+            long remainingBytes = StreamTools.ReadLong(stream);
+
+            using (FileStream writeStream = new FileStream(file, FileMode.Create, FileAccess.Write))
             {
-                return false;
+                byte[] buffer = new byte[bufferSize];
+
+                try
+                {
+                    int readByteCount;
+                    while (true)
+                    {
+                        //Read bytes chunk from stream
+                        if (remainingBytes < buffer.Length) readByteCount = stream.Read(buffer, 0, (int)remainingBytes);
+                        else readByteCount = stream.Read(buffer, 0, buffer.Length);
+
+                        if (readByteCount == 0) break;
+
+                        remainingBytes -= readByteCount;
+
+                        //Write bytes chunk to file
+                        writeStream.Write(buffer, 0, readByteCount);
+                        
+                        //Check if end of file
+                        if (remainingBytes < 1) break;
+
+                        Thread.Sleep(10);
+                    }
+                }
+                catch { return false; }
             }
+            return true;
+        }
+        #endregion
+        #region ENCRYPTED Write / Read File IMPLEMENT WITH BYTECRYPTOR
+        public static bool EncryptedWriteFile(Stream stream, string file, byte[] key)
+        {
+            file = FileTools.FormatPath(file);
+            if (!File.Exists(file)) return false;
+
+            long fileSize = new FileInfo(file).Length;
+
+            int keyIndex = 0;
+
+            //Send file size
+            bool wroteFileSize = StreamTools.WriteLong(stream, fileSize);
+
+            using (FileStream readStream = new FileStream(file, FileMode.Open, FileAccess.Read))
+            {
+                byte[] buffer = new byte[bufferSize];
+
+                try
+                {
+                    //Write all file bytes to stream, in chunks
+                    while (true)
+                    {
+                        //Read bytes chunk from file
+                        int readByteCount = readStream.Read(buffer, 0, buffer.Length);
+                        if (readByteCount == 0) break;
+
+                        //Encrypt bytes chunk
+                        buffer = ByteCryptor.Encrypt(buffer, key, keyIndex);
+
+                        //Cycle key index
+                        keyIndex += readByteCount;
+                        keyIndex %= key.Length;
+
+                        //Write bytes chunk to stream
+                        stream.Write(buffer, 0, readByteCount);
+
+                        Thread.Sleep(10);
+                    }
+                }
+                catch { return false; }
+            }
+            return true;
+        }
+
+        //Add long? override for max file size
+        public static bool EncryptedReadFile(Stream stream, string file, byte[] key)
+        {
+            //Get file size from sender
+            long remainingBytes = StreamTools.ReadLong(stream);
+
+            int keyIndex = 0;
+
+            using (FileStream writeStream = new FileStream(file, FileMode.Create, FileAccess.Write))
+            {
+                byte[] buffer = new byte[bufferSize];
+
+                try
+                {
+                    int readByteCount;
+                    while (true)
+                    {
+                        //Read bytes chunk from stream
+                        if (remainingBytes < buffer.Length) readByteCount = stream.Read(buffer, 0, (int)remainingBytes);
+                        else readByteCount = stream.Read(buffer, 0, buffer.Length);
+
+                        if (readByteCount == 0) break;
+                        remainingBytes -= readByteCount;
+
+                        //Decrypt bytes chunk
+                        buffer = ByteCryptor.Decrypt(buffer, key, keyIndex);
+
+                        //Cycle Key Index
+                        keyIndex += readByteCount;
+                        keyIndex %= key.Length;
+
+                        //Write bytes chunk to file
+                        writeStream.Write(buffer, 0, readByteCount);
+
+                        //Check if end of file
+                        if (remainingBytes < 1) break;
+
+                        Thread.Sleep(10);
+                    }
+                }
+                catch { return false; }
+            }
+            return true;
         }
         #endregion
     }

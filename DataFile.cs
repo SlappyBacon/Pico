@@ -79,7 +79,7 @@ namespace Pico.Data
             //if file exists, backup.  Overwrite old backup
             if (File.Exists(path)) File.Move(path, $"{path}.dbkp", true);
 
-            var lines = ToLines();
+            var lines = DataToLines();
 
             //write data to file
             File.WriteAllLines(path, lines);
@@ -90,7 +90,7 @@ namespace Pico.Data
         /// type,name,value
         /// </summary>
         /// <returns></returns>
-        public string[] ToLines()
+        public string[] DataToLines()
         {
             StringBuilder stringBuilder = new StringBuilder();
             List<string> lines = new List<string>();
