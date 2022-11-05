@@ -6,6 +6,8 @@ namespace Pico.Randoms
 {
 	public static class RandomTools
     {
+        public static bool Chance(float percent) => Random.Shared.NextDouble() < percent;
+
         #region Random String
         //Must provide a length
         //Optionally can provide a sring or char[] to sample characters from

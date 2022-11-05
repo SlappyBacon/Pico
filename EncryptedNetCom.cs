@@ -22,7 +22,7 @@ namespace Pico.Networking
     {
         public string IpAddress => netCom.IpAddress;
         NetCom netCom;
-        static byte[] key = new byte[256];
+        byte[] key = new byte[256];
         #region Constructors & Disposal
         /// <summary>
         /// Listen for connection request at 'port'

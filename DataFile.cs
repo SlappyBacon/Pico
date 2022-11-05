@@ -16,7 +16,7 @@ namespace Pico.Data
     class DataFile
     {
         //Type, Name, Value
-        static Dictionary<Type, Dictionary<string, object>> data = new Dictionary<Type, Dictionary<string, object>>();
+        Dictionary<Type, Dictionary<string, object>> data = new Dictionary<Type, Dictionary<string, object>>();
 
 
         /// <summary>
