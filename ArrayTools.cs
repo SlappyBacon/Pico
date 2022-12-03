@@ -129,13 +129,12 @@ namespace Pico.Arrays
         }
         #endregion
 
-
         #region Search
         /// <summary>
         /// Find elements within an array.
         /// </summary>
         /// <param name="array">Array to search through.</param>
-        /// <param name="determinant">Function which defines what you're searching for.  Example, find all numbers less than 10: bool Det(obj num) => num < 10</param>
+        /// <param name="determinant">Function which defines what you're searching for.  Example, find all numbers less than 10: bool Det(obj num) => (double)num < 10</param>
         /// <returns></returns>
         public static object[] Search(object array, Func<object, bool> determinant)
         {
@@ -150,12 +149,12 @@ namespace Pico.Arrays
         }
         #endregion
 
-
         #region Convert To String / Print
         public static string ToString(object array, bool vertical = false)
         {
             if (array == null) return "[null]";
             Array arr = array as Array;
+            if (arr.Length == 0) return "[empty]";
             StringBuilder sb = new StringBuilder();
             if (!vertical) sb.Append('[');
             for (int i = 0; i < arr.Length; i++)
