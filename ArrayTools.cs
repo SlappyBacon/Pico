@@ -134,15 +134,14 @@ namespace Pico.Arrays
         /// Find elements within an array.
         /// </summary>
         /// <param name="array">Array to search through.</param>
-        /// <param name="determinant">Function which defines what you're searching for.  Example, find all numbers less than 10: bool Det(obj num) => (double)num < 10</param>
+        /// <param name="determinant">Function which defines what you're searching for.  Example, find all ints less than 10: bool Determine(int num) => num < 10</param>
         /// <returns></returns>
-        public static object[] Search(object array, Func<object, bool> determinant)
+        public static T[] Search<T>(T[] array, Func<T, bool> determinant)
         {
-            Array arr = (Array)array;
-            List<object> result = new List<object>();
-            for (int i = 0; i < arr.Length; i++)
+            List<T> result = new List<T>();
+            for (int i = 0; i < array.Length; i++)
             {
-                var element = arr.GetValue(i);
+                var element = (T)array.GetValue(i);
                 if (determinant.Invoke(element)) result.Add(element);
             }
             return result.ToArray();
