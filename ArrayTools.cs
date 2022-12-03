@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Pico.Arrays
@@ -62,7 +63,7 @@ namespace Pico.Arrays
         /// <param name="order">Low-to-high, or high-to-low.</param>
         /// <param name="valueDeterminant">Custom method for determining value.  Example: If you want to sort a Vector3[] by magnitude, method shall return vector3.Length()</param>
         /// <returns></returns>
-        public static bool Sort(object array, SortOrder order = SortOrder.LowToHigh, Func<object, double> valueDeterminant = null)
+        public static bool Sort(object array, bool highToLow = false, Func<object, double> valueDeterminant = null)
         {
             Array arr = array as Array;
             if (arr == null) return false;  //Not an array, silly.
@@ -82,12 +83,12 @@ namespace Pico.Arrays
                     //Compare current element to the next one
                     //Determine if should swap
                     //If a swap is made, flag 'not done' to repeat the process
-                    switch (order)
+                    switch (highToLow)
                     {
-                        case SortOrder.LowToHigh:
+                        case false:
                             if (values[i + 1] < values[i]) Swap(i, i + 1);
                             break;
-                        case SortOrder.HighToLow: //Largest to smallest
+                        case true: //Largest to smallest
                             if (values[i + 1] > values[i]) Swap(i, i + 1);
                             break;
                     }
@@ -126,12 +127,29 @@ namespace Pico.Arrays
                 return 0;
             }
         }
-        public enum SortOrder
+        #endregion
+
+
+        #region Search
+        /// <summary>
+        /// Find elements within an array.
+        /// </summary>
+        /// <param name="array">Array to search through.</param>
+        /// <param name="determinant">Function which defines what you're searching for.  Example, find all numbers less than 10: bool Det(obj num) => num < 10</param>
+        /// <returns></returns>
+        public static object[] Search(object array, Func<object, bool> determinant)
         {
-            LowToHigh,
-            HighToLow
+            Array arr = (Array)array;
+            List<object> result = new List<object>();
+            for (int i = 0; i < arr.Length; i++)
+            {
+                var element = arr.GetValue(i);
+                if (determinant.Invoke(element)) result.Add(element);
+            }
+            return result.ToArray();
         }
         #endregion
+
 
         #region Convert To String / Print
         public static string ToString(object array, bool vertical = false)
@@ -157,7 +175,5 @@ namespace Pico.Arrays
         }
         public static void Print(object array, bool vertical = false) => Console.WriteLine(ToString(array, vertical));
         #endregion
-
-        
     }
 }
