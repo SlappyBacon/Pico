@@ -63,13 +63,12 @@ namespace Pico.Arrays
         /// <param name="order">Low-to-high, or high-to-low.</param>
         /// <param name="valueDeterminant">Custom method for determining value.  Example: If you want to sort a Vector3[] by magnitude, method shall return vector3.Length()</param>
         /// <returns></returns>
-        public static bool Sort(object array, bool highToLow = false, Func<object, double> valueDeterminant = null)
+        public static bool Sort<T>(T[] array, bool highToLow = false, Func<T, double> valueDeterminant = null)
         {
-            Array arr = array as Array;
-            if (arr == null) return false;  //Not an array, silly.
+            if (array == null) return false;  //Not an array, silly.
             if (valueDeterminant == null) valueDeterminant = DefaultValueDeterminant;
 
-            var values = AllElementValues(arr, valueDeterminant);
+            var values = AllElementValues(array, valueDeterminant);
 
             double tmpValue = 0;
             object tmpElement = null;
@@ -78,7 +77,7 @@ namespace Pico.Arrays
             while (true)
             {
                 done = true;
-                for (int i = 0; i < arr.Length - 1; i++)
+                for (int i = 0; i < array.Length - 1; i++)
                 {
                     //Compare current element to the next one
                     //Determine if should swap
@@ -100,28 +99,28 @@ namespace Pico.Arrays
             void Swap(int index1, int index2)
             {
                 //Swap values and elements
-                tmpElement = arr.GetValue(index1);
+                tmpElement = array.GetValue(index1);
                 tmpValue = values[index1];
 
-                arr.SetValue(arr.GetValue(index2), index1);
+                array.SetValue(array.GetValue(index2), index1);
                 values[index1] = values[index2];
 
-                arr.SetValue(tmpElement, index2);
+                array.SetValue(tmpElement, index2);
                 values[index2] = tmpValue;
 
                 done = false;
             }
-            double[] AllElementValues(Array array, Func<object, double> valueDeterminant)
+            double[] AllElementValues(Array array, Func<T, double> valueDeterminant)
             {
                 double[] elementValues = new double[array.Length];
                 for (int i = 0; i < array.Length; i++)
                 {
                     var element = array.GetValue(i);
-                    elementValues[i] = valueDeterminant.Invoke(element);
+                    elementValues[i] = valueDeterminant.Invoke((T)element);
                 }
                 return elementValues;
             }
-            double DefaultValueDeterminant(object obj)
+            double DefaultValueDeterminant(T obj)
             {
                 if (obj is IConvertible) return Convert.ToDouble(obj);
                 return 0;
