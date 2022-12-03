@@ -77,5 +77,26 @@ namespace Pico.Maths
         {
             return number % 2 == 0;
         }
+
+
+
+        /// <summary>
+        /// Returns the Fibonacci Vector3, according
+        /// to the given paramaters.
+        /// </summary>
+        /// <returns></returns>
+        public static Vector3 FibVector3(int point, int points)
+        {
+            var k = point + .5f;
+
+            var phi = Math.Acos(1f - 2f * k / points);
+            var theta = Math.PI * (1 + Math.Sqrt(5)) * k;
+
+            var x = Math.Cos(theta) * Math.Sin(phi);
+            var y = Math.Sin(theta) * Math.Sin(phi);
+            var z = Math.Cos(phi);
+
+            return new Vector3((float)x, (float)y, (float)z);
+        }
     }
 }

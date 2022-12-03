@@ -1,3 +1,4 @@
+using Pico.Maths;
 using System;
 using System.Numerics;
 using System.Text;
@@ -7,7 +8,6 @@ namespace Pico.Randoms
 	public static class RandomTools
     {
         public static bool Chance(float percent) => Random.Shared.NextDouble() < percent;
-
         #region Random String
         //Must provide a length
         //Optionally can provide a sring or char[] to sample characters from
@@ -21,22 +21,7 @@ namespace Pico.Randoms
                 '7', '8', '9'
         };
 
-        /// <summary>
-        /// Returns a random string with given parameters.
-        /// </summary>
-        /// <param name="length">Length of string.</param>
-        /// <param name="chars">Chars to sample from.</param>
-        /// <returns></returns>
-        public static string RandomString(int length, string chars)
-        {
-            StringBuilder text = new StringBuilder();
-            for (int i = 0; i < length;)
-            {
-                text.Append(chars[Random.Shared.Next(0, chars.Length)]);
-                i++;
-            }
-            return text.ToString();
-        }
+        
         /// <summary>
         /// Returns a random string with given parameters.
         /// </summary>
@@ -54,22 +39,63 @@ namespace Pico.Randoms
             }
             return text.ToString();
         }
+        /// <summary>
+        /// Returns a random string with given parameters.
+        /// </summary>
+        /// <param name="length">Length of string.</param>
+        /// <param name="chars">Chars to sample from.</param>
+        /// <returns></returns>
+        public static string RandomString(int length, string chars)
+        {
+            StringBuilder text = new StringBuilder();
+            for (int i = 0; i < length;)
+            {
+                text.Append(chars[Random.Shared.Next(0, chars.Length)]);
+                i++;
+            }
+            return text.ToString();
+        }
         #endregion
-
-
-
+        #region Random Byte Array
         /// <summary>
         /// Returns a random byte[]
         /// </summary>
-        /// <param name="length">Length of byte[]</param>
+        /// <param name="length">Length of array.</param>
+        /// <param name="min">Minimum value.</param>
+        /// <param name="max">Maximum value, inclusive.</param>
         /// <returns></returns>
-        public static byte[] RandomBytes(int length)
+        public static byte[] RandomByteArray(int length, byte min = byte.MinValue, byte max = byte.MaxValue)
         {
             byte[] bytes = new byte[length];
-            for (int i = 0; i < length; i++) bytes[i] = (byte)Random.Shared.Next(0, 256);
+            //Full range
+            if (min == byte.MinValue && max == byte.MaxValue)
+            {
+                Random.Shared.NextBytes(bytes);
+                return bytes;
+            }
+            //Specific range
+            if (max < min) max = min;
+            for (int i = 0; i < length; i++) bytes[i] = (byte)Random.Shared.Next(min, max + 1);
             return bytes;
         }
-
+        #endregion
+        #region Random Int Array
+        /// <summary>
+        /// Returns a random array.
+        /// </summary>
+        /// <param name="length">Length of array.</param>
+        /// <param name="min">Minimum value.</param>
+        /// <param name="max">Maximum value, exclusive.</param>
+        /// <returns></returns>
+        public static int[] RandomIntArray(int length, int min = int.MinValue, int max = int.MaxValue)
+        {
+            int[] nums = new int[length];
+            if (max < min) max = min;
+            for (int i = 0; i < length; i++) nums[i] = Random.Shared.Next(min, max);
+            return nums;
+        }
+        #endregion
+        #region Random Double
         /// <summary>
         /// Returns a random double between two numbers.
         /// </summary>
@@ -99,34 +125,16 @@ namespace Pico.Randoms
             var result = min + add;
             return result;
         }
-
+        #endregion
+        #region Random Vector3
         /// <summary>
         /// Returns a random Vector3 with a magnitude of 1.
         /// </summary>
         /// <returns></returns>
         public static Vector3 RandomVector3()
         {
-            return FibVector3(new Random().Next(0, int.MaxValue), int.MaxValue);
+            return MathTools.FibVector3(new Random().Next(0, int.MaxValue), int.MaxValue);
         }
-
-
-        /// <summary>
-        /// Returns the Fibonacci Vector3, according
-        /// to the given paramaters.
-        /// </summary>
-        /// <returns></returns>
-        public static Vector3 FibVector3(int point, int points)
-        {
-            var k = point + .5f;
-
-            var phi = Math.Acos(1f - 2f * k / points);
-            var theta = Math.PI * (1 + Math.Sqrt(5)) * k;
-
-            var x = Math.Cos(theta) * Math.Sin(phi);
-            var y = Math.Sin(theta) * Math.Sin(phi);
-            var z = Math.Cos(phi);
-
-            return new Vector3((float)x, (float)y, (float)z);
-        }
+        #endregion
     }
 }

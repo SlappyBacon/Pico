@@ -194,7 +194,6 @@ namespace Pico.Jobs
             }
             return -1;
         }
-
         #region Wait For Things
         /// <summary>
         /// If the job is scheduled, or currently active, then wait.
