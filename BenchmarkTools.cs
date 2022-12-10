@@ -5,22 +5,6 @@ namespace Pico.Benchmark
 	public static class BenchmarkTools
     {
         /// <summary>
-        /// Returns the amount of seconds
-        /// it takes to perform an action.
-        /// </summary>
-        /// <param name="action"></param>
-        /// <returns></returns>
-        public static double Benchmark(Action action)
-        {
-            DateTime start = DateTime.Now;
-            action();
-            return (DateTime.Now - start).TotalSeconds;
-        }
-
-
-
-
-        /// <summary>
         /// Returns the average amount of
         /// seconds it takes to perform an
         /// action 'count'  amount of times.
@@ -28,12 +12,18 @@ namespace Pico.Benchmark
         /// <param name="count"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        public static double Benchmark(Action action, int count)
+        public static double Benchmark(Action method, int count = 1)
         {
+            if (count < 1) count = 1;
             double time = 0;
+            DateTime start;
+            DateTime end;
             for (int i = 0; i < count;)
             {
-                time += Benchmark(action);
+                start = DateTime.Now;
+                method.Invoke();
+                end = DateTime.Now;
+                time += (end - start).TotalSeconds;
                 i++;
             }
             time /= count;

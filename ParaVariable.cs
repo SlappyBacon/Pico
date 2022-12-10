@@ -31,21 +31,36 @@ namespace Pico.Threads
             get { return thread == null || !thread.IsAlive; }
         }
         /// <summary>
-        /// Define the function to be performed, and it's input arg.
+        /// Define the function to be performed, and its input arg(S).
         /// </summary>
-        /// <param name="function">Must take in an object, and return an object.</param>
-        /// <param name="args">Object to pass into the function.</param>
-        public ParaVariable(object function, object args)
+        public ParaVariable(Delegate del, object arg1) => Setup(del, new object[] { arg1 });
+        public ParaVariable(Delegate del, object arg1, object arg2) => Setup(del, new object[] { arg1, arg2 });
+        public ParaVariable(Delegate del, object arg1, object arg2, object arg3) => Setup(del, new object[] { arg1, arg2, arg3 });
+        public ParaVariable(Delegate del, object arg1, object arg2, object arg3, object arg4) => Setup(del, new object[] { arg1, arg2, arg3, arg4 });
+        public ParaVariable(Delegate del, object arg1, object arg2, object arg3, object arg4, object arg5) => Setup(del, new object[] { arg1, arg2, arg3, arg4, arg5 });
+        public ParaVariable(Delegate del, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6) => Setup(del, new object[] { arg1, arg2, arg3, arg4, arg5, arg6 });
+        public ParaVariable(Delegate del, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7) => Setup(del, new object[] { arg1, arg2, arg3, arg4, arg5, arg6, arg7 });
+        public ParaVariable(Delegate del, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8) => Setup(del, new object[] { arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 });
+        public ParaVariable(Delegate del, object[] args = null) => Setup(del, args);
+
+        void Setup(Delegate del, object[] args)
         {
             thread = new Thread(new ParameterizedThreadStart(ThreadAction));
-            ThreadData threadData = new ThreadData((Func<object,object>)function, args);
-            thread.Start(threadData);
+            ThreadData data = new ThreadData(del, args);
+            thread.Start(data);
         }
 
-        void ThreadAction(object args)
+        void ThreadAction(object _data)
         {
-            ThreadData data = (ThreadData)args;
-            value = data.Function(data.Args);
+            ThreadData data = (ThreadData)_data;
+            try
+            {
+                value = data.Del.DynamicInvoke(data.Args);
+            }
+            catch
+            {
+                value = null;   //Args Mismatch
+            }
         }
         
         public void Dispose()
@@ -55,13 +70,15 @@ namespace Pico.Threads
 
         struct ThreadData
         {
-            public Func<object, object> Function;
-            public object Args;
-            public ThreadData(Func<object,object> setFunction, object args)
+            public Delegate Del;
+            public object[] Args;
+            public ThreadData(Delegate del, object[] args)
             {
-                Function = setFunction;
+                Del = del;
                 Args = args;
             }
         }
+
+        public override string ToString() => Value?.ToString();
     }
 }

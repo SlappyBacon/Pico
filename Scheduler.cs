@@ -141,6 +141,10 @@ namespace Pico.Jobs
         public int Schedule(Delegate del, object arg1, object arg2) => Schedule(del, new object[] { arg1, arg2 });
         public int Schedule(Delegate del, object arg1, object arg2, object arg3) => Schedule(del, new object[] { arg1, arg2, arg3 });
         public int Schedule(Delegate del, object arg1, object arg2, object arg3, object arg4) => Schedule(del, new object[] { arg1, arg2, arg3, arg4 });
+        public int Schedule(Delegate del, object arg1, object arg2, object arg3, object arg4, object arg5) => Schedule(del, new object[] { arg1, arg2, arg3, arg4, arg5 });
+        public int Schedule(Delegate del, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6) => Schedule(del, new object[] { arg1, arg2, arg3, arg4, arg5, arg6 });
+        public int Schedule(Delegate del, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7) => Schedule(del, new object[] { arg1, arg2, arg3, arg4, arg5, arg6, arg7});
+        public int Schedule(Delegate del, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8) => Schedule(del, new object[] { arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 });
         public int Schedule(Delegate del, object[] args = null)
         {
             //Schedule then return the delegate id
