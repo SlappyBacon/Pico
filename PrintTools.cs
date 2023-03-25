@@ -172,5 +172,7 @@ namespace Pico.Print
             Console.WriteLine($"Press [enter] to {action.ToLower()}...");
             Console.ReadLine();
         }
+
+        
     }
 }

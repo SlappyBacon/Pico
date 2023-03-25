@@ -2,6 +2,7 @@ using System.Net;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System;
 
 namespace Pico.Networking
 {
@@ -57,5 +58,41 @@ namespace Pico.Networking
             var ip = (IPEndPoint)client.Client.RemoteEndPoint;
             return ip.Address.ToString();
         }
+
+        public static bool IsValidIpAddress(string ipAddress)
+        {
+            //0.0.0.0         (7 chars)
+            //999.999.999.999 (15 chars)
+            if (ipAddress.Length < 7) return false;
+            if (ipAddress.Length > 15) return false;
+
+            //Must be exactly 3 dots.
+            int dots = 0;
+
+            //All characters must be either a number, or '.'
+            for (int i = 0; i < ipAddress.Length; i++)
+            {
+                bool isDot = ipAddress[i] == '.';
+                if (
+                    ipAddress[i] != '0' &&
+                    ipAddress[i] != '1' &&
+                    ipAddress[i] != '2' &&
+                    ipAddress[i] != '3' &&
+                    ipAddress[i] != '4' &&
+                    ipAddress[i] != '5' &&
+                    ipAddress[i] != '6' &&
+                    ipAddress[i] != '7' &&
+                    ipAddress[i] != '8' &&
+                    ipAddress[i] != '9' &&
+                    !isDot
+                    ) return false;         //Invalid Character
+                if (isDot) dots++;          //Increment Dots Count
+            }
+
+            if (dots != 3) return false;    //Wrong amount of dots.
+
+            return true;    //Is Valid :)
+        }
+
     }
 }

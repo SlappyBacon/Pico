@@ -1,5 +1,4 @@
-using System;
-using System.Collections.Generic;
+using Pico.Conversion;
 using System.Text;
 
 namespace Pico.Arrays
@@ -14,18 +13,21 @@ namespace Pico.Arrays
         /// <param name="arr1">First array.</param>
         /// <param name="arr2">Second array.</param>
         /// <returns></returns>
-        public static bool AreSame(Array arr1, Array arr2)
+        public static bool Compare(byte[] arr1, byte[] arr2)
         {
-            if (arr1 == null && arr2 == null) return true;      //Both null, same
-            if (arr1 == null && arr2 != null) return false;     //Different types
-            if (arr1 != null && arr2 == null) return false;     //Different types
-            if (arr1.GetType() != arr2.GetType()) return false; //Different types
-            if (arr1.Length != arr2.Length) return false;       //Different lengths                                              
-            for (int i = 0; i < arr1.Length; i++)               //Different elements?
+
+            if (arr1 == null && arr2 == null) return true;  //Both null
+            if (arr1 == null && arr2 != null) return false; //One null
+            if (arr2 == null && arr1 != null) return false; //One null
+
+            if (arr1.Length != arr2.Length) return false;
+
+            for (int i = 0; i < arr1.Length; i++)
             {
-                if (arr1.GetValue(i) != arr2.GetValue(i)) return false; 
+                if (arr1[i] != arr2[i]) return false;
             }
-            return true;//Same
+
+            return true;
         }
         #endregion
 
@@ -172,5 +174,89 @@ namespace Pico.Arrays
         }
         public static void Print(object array, bool vertical = false) => Console.WriteLine(ToString(array, vertical));
         #endregion
+
+
+
+        #region PrintCompare
+        /// <summary>
+        /// Compares two int arrays, and highlights any differences.
+        /// </summary>
+        /// <param name="arr1">Array One.</param>
+        /// <param name="arr2">Array Two.</param>
+        public static void PrintCompare<T>(T[] arr1, T[] arr2)
+        {
+            int longest;
+            if (arr1.Length > arr2.Length)
+            {
+                longest = arr1.Length;
+            }
+            else longest = arr2.Length;
+
+
+            //Determine changed
+            bool[] changed = new bool[longest];
+            for (int i = 0; i < longest; i++)
+            {
+                if (i >= arr1.Length || i >= arr2.Length)
+                {
+                    changed[i] = true;
+                    continue;
+                }
+
+                if (!arr1[i].Equals(arr2[i]))
+                {
+                    changed[i] = true;
+                    continue;
+                }
+                changed[i] = false;
+            }
+
+            //Print Arr1
+            WriteArray(arr1);
+
+
+            //Print Arr2
+            WriteArray(arr2);
+
+
+            void WriteArray<T>(T[] array)
+            {
+                for (int i = 0; i < longest; i++)
+                {
+                    if (i < array.Length)
+                    {
+                        WriteString(array[i].ToString(), changed[i]);
+                    }
+                    else
+                    {
+                        WriteString(" ", changed[i]);
+                    }
+
+                    if (i != longest - 1) Console.Write(',');
+                }
+                Console.WriteLine();
+            }
+
+
+
+            void WriteString(string text, bool highlight)
+            {
+                if (!highlight)
+                {
+                    //Print
+                    Console.Write(text);
+                    return;
+                }
+                //Highlight
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.Black;
+                //Print
+                Console.Write(text);
+                //Reset
+                Console.ResetColor();
+            }
+
+            #endregion
+        }
     }
 }

@@ -136,5 +136,16 @@ namespace Pico.Randoms
             return MathTools.FibVector3(new Random().Next(0, int.MaxValue), int.MaxValue);
         }
         #endregion
+        #region Random Ip Address
+        public static string RandomIpAddress()
+        {
+            //xxx.xxx.xxx.xxx
+            var n1 = Random.Shared.Next(0, 1000);
+            var n2 = Random.Shared.Next(0, 1000);
+            var n3 = Random.Shared.Next(0, 1000);
+            var n4 = Random.Shared.Next(0, 1000);
+            return $"{n1}.{n2}.{n3}.{n4}";
+        }
+        #endregion
     }
 }

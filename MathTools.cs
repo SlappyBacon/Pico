@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace Pico.Maths
@@ -97,6 +98,52 @@ namespace Pico.Maths
             var z = Math.Cos(phi);
 
             return new Vector3((float)x, (float)y, (float)z);
+        }
+
+
+        static List<int> PrimesBetween(int lowerLimit, int upperLimit)
+        {
+            //Ensure all parameters are valid
+            //Limits must both be positive integers
+            //Upper limit must be larger than lower limit
+            if (lowerLimit <= 0 || upperLimit <= 0 || upperLimit <= lowerLimit) return null;
+
+            //Populate list with all numbers in between lower and upper limits
+            List<int> result = new List<int>();
+            for (int i = lowerLimit; i <= upperLimit; i++) result.Add(i);
+
+            //Remove 1 if it's present
+            result.Remove(1);
+
+            int index = 0;
+            while (true)
+            {
+                //Check to see if at end of list
+                int number;
+                try
+                {
+                    number = result[index];
+                }
+                catch
+                {
+                    break;
+                }
+
+                //Check if number is prime
+                if (!IntIsPrime(number))
+                {
+                    //Remove all multiples of that number
+                    int steps = number;
+                    while (true)
+                    {
+                        if (number > upperLimit) break;
+                        result.Remove(number);
+                        number += steps;
+                    }
+                }
+                else index++;
+            }
+            return result;
         }
     }
 }

@@ -10,6 +10,7 @@ namespace Pico.Jobs
 {
     public class Scheduler : IDisposable
     {
+        public bool Debug { get { return debug; } set { debug = value; } }
         public int ThreadCount { get { return workerThreads.Length; } }
         public int JobsScheduled { get { return schedule.Count; } }
         public int JobsActive
@@ -28,14 +29,14 @@ namespace Pico.Jobs
             }
         }
 
-
-        private Dictionary<int, Delegate> schedule;
-        private Dictionary<int, object[]> scheduleArgs;
-        private Dictionary<int, int> threadJobId;
-        private Dictionary<int, object> results;
-        private bool disposing = false;
-        private int nextScheduleId = 0;
-        private Thread[] workerThreads;
+        bool debug = false;
+        Dictionary<int, Delegate> schedule;
+        Dictionary<int, object[]> scheduleArgs;
+        Dictionary<int, int> threadJobId;
+        Dictionary<int, object> results;
+        bool disposing = false;
+        int nextScheduleId = 0;
+        Thread[] workerThreads;
 
 
 
@@ -43,9 +44,9 @@ namespace Pico.Jobs
         /// Creates a job scheduler.
         /// </summary>
         /// <param name="threadCount">Number of dedicated threads. (Max amount of simultanious jobs)</param>
-        public Scheduler(int threadCount = 4)
+        public Scheduler(int threadCount = -1)
         {
-            if (threadCount > Environment.ProcessorCount) threadCount = Environment.ProcessorCount;
+            if (threadCount < 1) threadCount = 1;
             schedule = new Dictionary<int, Delegate>(threadCount);
             scheduleArgs = new Dictionary<int, object[]>(threadCount);
             threadJobId = new Dictionary<int, int>(threadCount);
@@ -56,13 +57,14 @@ namespace Pico.Jobs
                 threadJobId[i] = -1;
                 workerThreads[i] = new Thread(new ParameterizedThreadStart(WorkerThreadAction));
                 workerThreads[i].Start(i);
+                Thread.Sleep(1);
             }
         }
 
         //Each worker thread checks the schedule to see if there's any jobs to be done.
         //If there's a job, claim it and get started.
         //If not, chill out and check again.
-        private void WorkerThreadAction(object _id)
+        void WorkerThreadAction(object _id)
         {
             int threadId = (int)_id;
 
@@ -102,7 +104,7 @@ namespace Pico.Jobs
                 //Invoke and store result
                 lock (threadJobId)
                 {
-                    //Is now busy
+                    if (debug) Console.WriteLine($"T{threadId} Busy");
                     threadJobId[threadId] = scheduleId;
                 }
                 try
@@ -116,20 +118,20 @@ namespace Pico.Jobs
                         }
                     }
                     count++;
-                    //Console.WriteLine($"[{threadId}-{scheduleId}] Complete");
+                    if (debug) Console.WriteLine($"T{threadId} J{scheduleId} Complete");
                 }
                 catch
                 {
-                    //Console.WriteLine($"[{threadId}-{scheduleId}] Error");
+                    if (debug) Console.WriteLine($"T{threadId} J{scheduleId} Error");
                 }
                 lock (threadJobId)
                 {
-                    //Not busy anymore
+                    if (debug) Console.WriteLine($"T{threadId} Available");
                     threadJobId[threadId] = -1;
                 }
 
             }
-            //Console.WriteLine($"[{threadId}] Exited ({count} Jobs Complete)");
+            if (debug) Console.WriteLine($"T{threadId} Exited ({count} Jobs Complete)");
         }
 
 
@@ -160,6 +162,7 @@ namespace Pico.Jobs
                     }
                 }
             }
+            if (debug) Console.WriteLine($"J{nextScheduleId} Scheduled");
             return nextScheduleId++;
         }
         #endregion
@@ -186,8 +189,9 @@ namespace Pico.Jobs
             return result;
         }
         #endregion
+        #region ThreadRunningJob
         //Returns the thread a job is currently running on, or -1
-        private int ThreadRunningJob(int jobId)
+        public int ThreadRunningJob(int jobId)
         {
             for (int i = 0; i < threadJobId.Count; i++)
             {
@@ -198,6 +202,7 @@ namespace Pico.Jobs
             }
             return -1;
         }
+        #endregion
         #region Wait For Things
         /// <summary>
         /// If the job is scheduled, or currently active, then wait.
@@ -253,7 +258,7 @@ namespace Pico.Jobs
                     }
                 }
             }
-            //Console.WriteLine("Scheduler disposal complete.");
+            if (debug) Console.WriteLine("Disposal Complete.");
         }
         #endregion
     }

@@ -315,7 +315,6 @@ namespace Pico.Networking
             return array;
         }
         #endregion
-
         public bool WriteFile(string file)
         {
             return StreamTools.WriteFile(stream, file);
@@ -324,6 +323,5 @@ namespace Pico.Networking
         {
             return StreamTools.ReadFile(stream, file);
         }
-
     }
 }
