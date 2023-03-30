@@ -124,6 +124,8 @@ class DiskBuffer<T>
         return default(T);
     }
     
+
+
     bool IdIsValid(long id) => id > 0 && id < nextId;
     
     int IsRecentlyConfirmed(long id)

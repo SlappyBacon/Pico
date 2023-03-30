@@ -1,4 +1,6 @@
 using Pico.Conversion;
+using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Pico.Arrays
