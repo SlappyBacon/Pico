@@ -12,8 +12,8 @@ class UdpNetCom : IDisposable
 {
     // Create a new UdpClient and bind it to a local endpoint
     UdpClient udpClient;
-    public Action<IPEndPoint, byte[]> OnBytesReceived = null;
-    public Action<IPEndPoint, byte[]> OnBytesSent = null;
+    public Action<UdpNetCom, IPEndPoint, byte[]> OnBytesReceived = null;
+    public Action<UdpNetCom, IPEndPoint, byte[]> OnBytesSent = null;
 
     public UdpNetCom()
     {
@@ -44,7 +44,7 @@ class UdpNetCom : IDisposable
         if (endpoint == null) return false;
 
         int sent = udpClient.Send(bytes, bytes.Length, endpoint);
-        OnBytesSent?.Invoke(endpoint, bytes);
+        OnBytesSent?.Invoke(this, endpoint, bytes);
         return sent == bytes.Length;
     }
 
@@ -75,7 +75,7 @@ class UdpNetCom : IDisposable
         if (udpClient == null) return null;
         if (fromEndPoint == null) return null;
         var read = udpClient.Receive(ref fromEndPoint);
-        OnBytesReceived?.Invoke(fromEndPoint, read);
+        OnBytesReceived?.Invoke(this, fromEndPoint, read);
         return read;
     }
 

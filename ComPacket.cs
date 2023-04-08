@@ -2,7 +2,7 @@
 using System.Text;
 namespace Pico.Networking;
 
-public class ComPacket
+public struct ComPacket
 {
     public int Prefix;
     public byte[] Body;
@@ -16,7 +16,8 @@ public class ComPacket
     public ComPacket(int prefix, string text = null) //Convert object? to bytes
     {
         this.Prefix = prefix;
-        SetBodyText(text);
+        if (text == null) Body = new byte[0];
+        else Body = ASCIIEncoding.ASCII.GetBytes(text);
     }
 
 
@@ -25,8 +26,8 @@ public class ComPacket
     //Packet / Data Conversion
     public static ComPacket FromBytes(byte[] data)
     {
-        if (data == null) return null;
-        if (data.Length < 4) return null;
+        if (data == null) return new ComPacket(0, new byte[] { });
+        if (data.Length < 4) return new ComPacket(0, new byte[] { });
 
         var prefix = BitConverter.ToInt32(data, 0);
 
