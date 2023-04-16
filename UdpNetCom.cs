@@ -29,21 +29,15 @@ class UdpNetCom : IDisposable
     }
 
     public const int DefaultTimeoutMilliseconds = 2000;
-
-    public UdpNetCom()
-    {
-        _udpClient = new UdpClient();
-    }
-
-    public UdpNetCom(int myLocalPort) //Where I receive messages
+    public const int MinBufferSize = 1048576;
+    public const int MaxBufferSize = 1073741824;
+    public UdpNetCom(int myLocalPort, int rxBufferSize, int txBufferSize) //Where I receive messages
     {
         _udpClient = new UdpClient(myLocalPort);
-        _udpClient.Client.ReceiveBufferSize = 33554432;
-        _udpClient.Client.SendBufferSize = 33554432;
-        Console.WriteLine(_udpClient.Client.ReceiveBufferSize);
-        Console.WriteLine(_udpClient.Client.SendBufferSize);
+        _udpClient.Client.ReceiveBufferSize = Math.Clamp(rxBufferSize, MinBufferSize, MaxBufferSize);
+        _udpClient.Client.SendBufferSize = Math.Clamp(txBufferSize, MinBufferSize, MaxBufferSize);
     }
-
+    public UdpNetCom(int myLocalPort, int bufferSize = 8388608) : this(myLocalPort, bufferSize, bufferSize) { }
     public byte[] ReadBytesFromAny()
     {
         var endpoint = new IPEndPoint(IPAddress.Any, 0);
