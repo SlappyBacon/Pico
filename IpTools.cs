@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System;
+using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace Pico.Networking
 {
@@ -17,14 +19,11 @@ namespace Pico.Networking
         /// <returns></returns>
         public static string MyLocalIp()
         {
-            try
+            var hostName = Dns.GetHostName();
+            IPAddress[] addresses = Dns.GetHostAddresses(hostName);
+            if (addresses.Length > 0)
             {
-                IPAddress[] addresses = Dns.GetHostAddresses(Dns.GetHostName());
-                if (addresses.Length > 0) return addresses[addresses.Length - 1].ToString();
-            }
-            catch
-            {
-                
+                return addresses[addresses.Length - 1].ToString();
             }
             return null;
         }
@@ -34,16 +33,11 @@ namespace Pico.Networking
         /// </summary>
         /// <returns></returns>
 
-        public static string MyPublicIp()
+        public static async Task<string> MyPublicIp(HttpClient httpClient = null)
         {
-            try
-            {
-                return new WebClient().DownloadString("https://api.ipify.org");
-            }
-            catch
-            {
-                return null;
-            }
+            if (httpClient == null) httpClient = new HttpClient();
+            var got = await httpClient.GetAsync("https://api.ipify.org");
+            return await got.Content.ReadAsStringAsync();
         }
 
         /// <summary>

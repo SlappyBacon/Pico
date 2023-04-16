@@ -64,7 +64,7 @@ namespace Pico.Arrays
         /// Sort an array.
         /// </summary>
         /// <param name="array">Array you want to sort.</param>
-        /// <param name="order">Low-to-high, or high-to-low.</param>
+        /// <param name="highToLow">Low-to-high, or high-to-low.</param>
         /// <param name="valueDeterminant">Custom method for determining value.  Example: If you want to sort a Vector3[] by magnitude, method shall return vector3.Length()</param>
         /// <returns></returns>
         public static bool Sort<T>(T[] array, bool highToLow = false, Func<T, double> valueDeterminant = null)
@@ -152,29 +152,64 @@ namespace Pico.Arrays
         #endregion
 
         #region Convert To String / Print
-        public static string ToString(object array, bool vertical = false)
+        public static string ToString<T>(T[,] array, int rows, int columns)
         {
             if (array == null) return "[null]";
-            Array arr = array as Array;
-            if (arr.Length == 0) return "[empty]";
+            if (array.Length == 0) return "[empty]";
             StringBuilder sb = new StringBuilder();
-            if (!vertical) sb.Append('[');
-            for (int i = 0; i < arr.Length; i++)
+
+
+            for (int r = 0; r < rows; r++)
             {
-                var element = arr.GetValue(i);
-                if (vertical) sb.Append($"{element},\n");
-                else sb.Append($"{element},");
+                sb.Append('[');
+                for (int c = 0; c < columns; c++)
+                {
+                    sb.Append(array[r, c]);
+                    if (c != columns - 1)
+                    {
+                        //Not last column
+                        sb.Append(',');
+                    }
+                }
+                sb.Append(']');
+                if (r != rows - 1)
+                {
+                    //Not last row
+                    sb.Append('\n');
+                }
             }
-            if (sb.Length > 0)
-            {
-                //Trim
-                if (vertical) sb.Remove(sb.Length - 2, 2); //",\n"
-                else sb.Remove(sb.Length - 1, 1); //","
-            }
-            if (!vertical) sb.Append(']');
+
+
             return sb.ToString();
         }
-        public static void Print(object array, bool vertical = false) => Console.WriteLine(ToString(array, vertical));
+        public static string ToString<T>(T[] array)
+        {
+            if (array == null) return "[null]";
+            if (array.Length == 0) return "[empty]";
+            StringBuilder sb = new StringBuilder();
+            sb.Append('[');
+            for (int i = 0; i < array.Length; i++)
+            {
+                sb.Append(array[i]);
+                if (i != array.Length - 1)
+                {
+                    //Not last column
+                    sb.Append(',');
+                }
+            }
+            sb.Append(']');
+            return sb.ToString();
+        }
+        public static void Print<T>(T[,] array, int rows, int columns)
+        {
+            var text = ToString(array, rows, columns);
+            Console.WriteLine(text);
+        }
+        public static void Print<T>(T[] array)
+        {
+            var text = ToString(array);
+            Console.WriteLine(text);
+        }
         #endregion
 
 
@@ -187,6 +222,16 @@ namespace Pico.Arrays
         /// <param name="arr2">Array Two.</param>
         public static void PrintCompare<T>(T[] arr1, T[] arr2)
         {
+            if (arr1 == null && arr2 != null)
+            {
+                Console.WriteLine("[INVALID]");
+                return;
+            }
+            if (arr2 == null && arr1 != null)
+            {
+                Console.WriteLine("[INVALID]");
+                return;
+            }
             int longest;
             if (arr1.Length > arr2.Length)
             {

@@ -20,8 +20,7 @@ namespace Pico.Media
         /// <returns>Video bits-per-second.</returns>
         public static long VideoBitrate(int width, int height, int framesPerSecond, float bitsPerPixel)
         {
-            float bitsPerSecond = (float)width * (float)height * (float)framesPerSecond * bitsPerPixel;
-            return (long)bitsPerSecond;
+            return (long)((float)width * (float)height * (float)framesPerSecond * bitsPerPixel);
         }
     }
 }

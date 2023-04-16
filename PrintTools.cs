@@ -2,14 +2,14 @@
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Pico.Print
 {
     public static class PrintTools
     {
-        
-
-
+        static bool _isBeeping = false;
+        static object _beepLock = new object();
         /// <summary>
         /// Prints a cosmetic loading effect.
         /// </summary>
@@ -34,30 +34,77 @@ namespace Pico.Print
         /// </summary>
         /// <param name="text">Text to write.</param>
         /// <param name="color">Highlight color.</param>
-        public static void Alert(string text, ConsoleColor color = ConsoleColor.Red)
+        public static void Alert(string text, ConsoleColor color = ConsoleColor.Red, int beepHertz = -1, int beepMs = 50)
         {
+            if (beepHertz > 0 && !_isBeeping)
+            {
+                beepMs = Math.Clamp(beepMs, 50, 2500);
+                
+                Task.Run(() =>
+                {
+                    lock (_beepLock)
+                    {
+                        _isBeeping = true;
+                        Console.Beep(beepHertz, beepMs);
+                        _isBeeping = false;
+                    }
+                });
+            }
+
+            var oldFgColor = Console.ForegroundColor;
+            var oldBgColor = Console.BackgroundColor;
+
             ConsoleColor textColor;
             if (color == ConsoleColor.Black || color == ConsoleColor.DarkBlue) textColor = ConsoleColor.White;
             else textColor = ConsoleColor.Black;
-            Console.BackgroundColor = color;
-            Console.ForegroundColor = textColor;
-            Console.WriteLine(text);
-            Console.ResetColor();
 
-            //Add beep boop beep?\\
 
+            bool isColored = false;
+            Color();
+            for (int i = 0; i < text.Length; i++)
+            {
+                WriteTextChar(text[i]);
+            }
+            WriteTextChar('\n', true);
+
+            void WriteTextChar(char c, bool isFinalCharacter = false)
+            {
+                if (c == '\n')
+                {
+                    UnColor();
+                    Console.Write(c);
+                    //Re-Color?
+                    if (!isFinalCharacter) Color();
+                    return;
+                }
+                Console.Write(c);
+            }
+
+            bool Color()
+            {
+                if (isColored) return false;
+                Console.BackgroundColor = color;
+                Console.ForegroundColor = textColor;
+                return true;
+            }
+            bool UnColor()
+            {
+                if (!isColored) return true;
+                Console.ForegroundColor = oldFgColor;
+                Console.BackgroundColor = oldBgColor;
+                return true;
+            }
         }
-
 
         /// <summary>
         /// Prints text with a timestamp.
         /// </summary>
         /// <param name="text">Text to write.</param>
-        public static void TimeStamp(string text)
+        public static string TimeStamp(string text)
         {
             //$"[{time}] {message}"
             DateTime now = DateTime.Now;
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(text.Length + 14);
             sb.Append('[');
             sb.Append(now.Hour);
             sb.Append(':');
@@ -72,7 +119,7 @@ namespace Pico.Print
                 sb.Append(' ');
                 sb.Append(text);
             }
-            Console.WriteLine(sb.ToString());
+            return sb.ToString();
         }
 
         public static string FormatPercent(double num)
@@ -167,12 +214,12 @@ namespace Pico.Print
         /// </summary>
         /// <param name="action">Action to be displayed in message.</param>
         /// <returns></returns>
-        public static void EnterToContinue(string action = "continue")
+        public static void EnterToContinue(string action = "continue", ConsoleColor color = ConsoleColor.Green, int beepHertz = -1, int beepMs = -1)
         {
-            Console.WriteLine($"Press [enter] to {action.ToLower()}...");
+            var alertText = $"Press ENTER to {action.ToLower()}...";
+            Alert(alertText, color, beepHertz, beepMs);
             Console.ReadLine();
         }
 
-        
     }
 }
