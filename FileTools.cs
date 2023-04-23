@@ -36,31 +36,18 @@ namespace Pico.Files
 
                 if (fileSize < defaultBufferSize)
                 {
-                    RandomizeByteArray(ref buffer, (int)fileSize);
+                    Random.Shared.NextBytes(buffer);
                     writer.Write(buffer, 0, (int)fileSize);
                     fileSize -= fileSize;
                 }
                 else
                 {
-                    RandomizeByteArray(ref buffer, buffer.Length);
+                    Random.Shared.NextBytes(buffer);
                     writer.Write(buffer, 0, buffer.Length);
                     fileSize -= buffer.Length;
                 }
             }
             writer.Dispose();
-            return;
-
-
-            void RandomizeByteArray(ref byte[] bytes, int length)
-            {
-                byte[] b = new byte[1];
-                for (int i = 0; i < length; i++)
-                {
-                    if (i >= bytes.Length) return;
-                    Random.Shared.NextBytes(b);
-                    bytes[i] = b[0];
-                }
-            }
         }
 
         /// <summary>
@@ -81,31 +68,52 @@ namespace Pico.Files
         /// Returns a list of all files within a directory.
         /// </summary>
         /// <param name="directory">Root directory.</param>
-        /// <param name="inCludeSubDirs">Recursive?</param>
+        /// <param name="includeSubDirs">Recursive?</param>
         /// <returns></returns>
-        public static string[] GetAllFilePaths(string directory, bool inCludeSubDirs = false)
+        public static async Task<string[]> GetAllFilePathsAsync(string directory, bool includeSubDirs = false)
         {
             List<string> result = new List<string>(64);
-
-            try
-            {
-                var filePaths = Directory.GetFiles(directory);
-                foreach (var filePath in filePaths) result.Add(filePath);
-                if (!inCludeSubDirs) return result.ToArray();
-                var subDirs = Directory.GetDirectories(directory);
-                foreach (var subDir in subDirs)
-                {
-                    var subDirFilePaths = GetAllFilePaths(subDir, true);
-                    result.AddRange(subDirFilePaths);
-                }
-            }
-            catch (Exception o)
-            {
-                Console.WriteLine(o.Message);
-            }
-            
+            await ForEachFilePath(directory, result.Add, includeSubDirs);
             return result.ToArray();
         }
+
+        /// <summary>
+        /// Iterates through each directory, and performs an action to each one.
+        /// </summary>
+        /// <param name="directory"></param>
+        /// <param name="action"></param>
+        /// <param name="includeSubDirs"></param>
+        /// <returns></returns>
+        public static async Task ForEachFilePathAsync(string directory, Action<string> action, bool includeSubDirs = false)
+        {
+            if (directory == null) return;
+            if (action == null) return;
+            string[] filePaths;
+            try
+            {
+                filePaths = Directory.GetFiles(directory);
+            }
+            catch
+            {
+                filePaths = new string[0];
+            }
+            foreach (var filePath in filePaths)
+            {
+                action.Invoke(filePath);
+            }
+            if (!includeSubDirs) return;
+            var subDirs = Directory.GetDirectories(directory);
+            Task[] subDirTasks = new Task[subDirs.Length];
+            for (int i = 0; i < subDirs.Length; i++)
+            {
+                subDirTasks[i] = ForEachFilePathAsync(subDirs[i], action, includeSubDirs);
+            }
+            for (int i = 0; i < subDirs.Length; i++)
+            {
+                await subDirTasks[i];
+            }
+        }
+
 
         /// <summary>
         /// File copy operation, wrapped in a 'try' statement.
@@ -127,81 +135,6 @@ namespace Pico.Files
             }
         }
 
-        /// <summary>
-        /// Copy all files from one directory to another.
-        /// Can also multithread :)
-        /// </summary>
-        /// <param name="fromRootDirectory">From path.</param>
-        /// <param name="toRootDirectory">To path.</param>
-        /// <param name="overwrite">Overwrite?</param>
-        /// <returns></returns>
-        public static void CopyAllFiles(string fromRootDirectory, string toRootDirectory, bool recursive = false, bool overwrite = false, int threadCount = 1)
-        {
-
-            //Add file extension filtering?  Input string[] of w/b listed extensions
-
-            if (!Directory.Exists(fromRootDirectory)) return;
-            var files = FileTools.GetAllFilePaths(fromRootDirectory, true);
-
-            if (threadCount == 1) SingleThread();
-            else MultiThread();
-
-
-
-
-            void SingleThread()
-            {
-                //SINGLE THREAD
-                // Copy all on this thread
-                foreach (string file in files)
-                {
-                    string to = ChangeRoot(file);
-                    string fileName = FileTools.FileName(file);
-                    string toDir = to.Replace(fileName, "");
-                    if (!Directory.Exists(toDir)) Directory.CreateDirectory(toDir);
-                    TryCopy(file, to, overwrite);
-                }
-            }
-            void MultiThread()
-            {
-                //MULTITHREAD
-                if (files.Length < threadCount) threadCount = files.Length;
-                Thread[] threads = new Thread[threadCount];
-                //Go through the list, assigning to threads
-                for (int i = 0; i < files.Length;)
-                {
-                    string to = ChangeRoot(files[i]);
-                    string toDir = to.Replace(FileTools.FileName(files[i]), "");
-                    if (!Directory.Exists(toDir)) Directory.CreateDirectory(toDir);
-                    //Could check if file already exists here, instead of after starting the new thread...
-                    string ow;
-                    if (overwrite) ow = "1";
-                    else ow = "0";
-                    string[] fromToOverwrite = new string[] { files[i], to, ow };
-                    int freeThreadIndex;  //Wait for next available thread
-                    while (!ThreadTools.FindFreeThread(threads, out freeThreadIndex)) Thread.Sleep(25);
-                    threads[freeThreadIndex] = new Thread(CopyFileThreadAction);
-                    threads[freeThreadIndex].Start(fromToOverwrite);   //Start next job on list
-                    i++;
-                }
-                ThreadTools.JoinThreads(threads);
-            }
-
-            void CopyFileThreadAction(object fromToOverwrite)
-            {
-                string[] args = (string[])fromToOverwrite;
-                string from = args[0];
-                string to = args[1];
-                bool overwrite = (args[2] == "1");
-                TryCopy(from, to, overwrite);
-            }
-
-            string ChangeRoot(string filePath)
-            {
-                string subFromRoot = filePath.Replace(fromRootDirectory, "");
-                return toRootDirectory + subFromRoot;
-            }
-        }
         /// <summary>
         /// Formats a file path so it's universally readable.
         /// </summary>
@@ -238,7 +171,7 @@ namespace Pico.Files
         /// <param name="filePath1">File path one.</param>
         /// <param name="filePath2">File path two.</param>
         /// <returns></returns>
-        public static bool FilesAreSame(string filePath1, string filePath2)
+        public static async Task<bool> FilesAreSameAsync(string filePath1, string filePath2)
         {
             bool result = true;
 
@@ -305,7 +238,7 @@ namespace Pico.Files
         /// <param name="filePath1">File path one.</param>
         /// <param name="filePath2">File path two.</param>
         /// <returns></returns>
-        public static double CompareFileBytes(string filePath1, string filePath2)
+        public static async Task<double> CompareFileBytesAsync(string filePath1, string filePath2)
         {
             byte[] buffer1 = new byte[512000];
             FileStream reader1 = new FileStream(filePath1, FileMode.Open, FileAccess.Read);

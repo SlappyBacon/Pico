@@ -353,11 +353,7 @@ namespace Pico.Streams
                         if (readByteCount == 0) break;
 
                         //Encrypt bytes chunk
-                        buffer = ByteCryptor.Encrypt(buffer, key, keyIndex);
-
-                        //Cycle key index
-                        keyIndex += readByteCount;
-                        keyIndex %= key.Length;
+                        ByteCryptor.Encrypt(buffer, key, ref keyIndex);
 
                         //Write bytes chunk to stream
                         stream.Write(buffer, 0, readByteCount);
@@ -395,11 +391,7 @@ namespace Pico.Streams
                         remainingBytes -= readByteCount;
 
                         //Decrypt bytes chunk
-                        buffer = ByteCryptor.Decrypt(buffer, key, keyIndex);
-
-                        //Cycle Key Index
-                        keyIndex += readByteCount;
-                        keyIndex %= key.Length;
+                        ByteCryptor.Decrypt(buffer, key, ref keyIndex);
 
                         //Write bytes chunk to file
                         writeStream.Write(buffer, 0, readByteCount);

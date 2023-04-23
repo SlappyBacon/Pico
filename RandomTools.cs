@@ -21,7 +21,30 @@ namespace Pico.Randoms
                 '7', '8', '9'
         };
 
-        
+
+        /// <summary>
+        /// Returns a random string with given parameters.
+        /// </summary>
+        /// <param name="chars">Chars to sample from.</param>
+        /// <returns></returns>
+        public static char RandomChar(char[] chars = null)
+        {
+            if (chars == null) chars = DefaultRandomStringChars;
+            if (chars.Length < 1) return default(char);
+            return chars[Random.Shared.Next(0, chars.Length)];
+        }
+        /// <summary>
+        /// Returns a random string with given parameters.
+        /// </summary>
+        /// <param name="chars">Chars to sample from.</param>
+        /// <returns></returns>
+        public static char RandomChar(string chars)
+        {
+            if (chars == null) return default(char);
+            if (chars.Length < 1) return default(char);
+            return chars[Random.Shared.Next(0, chars.Length)];
+        }
+
         /// <summary>
         /// Returns a random string with given parameters.
         /// </summary>
@@ -34,7 +57,8 @@ namespace Pico.Randoms
             StringBuilder text = new StringBuilder();
             for (int i = 0; i < length;)
             {
-                text.Append(chars[Random.Shared.Next(0, chars.Length)]);
+                var rngChar = RandomChar(chars);
+                text.Append(rngChar);
                 i++;
             }
             return text.ToString();
@@ -47,10 +71,13 @@ namespace Pico.Randoms
         /// <returns></returns>
         public static string RandomString(int length, string chars)
         {
+            //chars should never be null here.  Because otherwise
+            //it would call char[] sample method insead.
             StringBuilder text = new StringBuilder();
             for (int i = 0; i < length;)
             {
-                text.Append(chars[Random.Shared.Next(0, chars.Length)]);
+                var rngChar = RandomChar(chars);
+                text.Append(rngChar);
                 i++;
             }
             return text.ToString();

@@ -63,12 +63,6 @@ namespace Pico.Data
             return true;
         }
 
-
-
-        
-
-
-
         /// <summary>
         /// Save data to disk.
         /// </summary>
@@ -79,136 +73,16 @@ namespace Pico.Data
             //if file exists, backup.  Overwrite old backup
             if (File.Exists(path)) File.Move(path, $"{path}.dbkp", true);
 
-            var lines = DataToLines();
+            throw new Exception();
+            var lines = new string[0];
 
             //write data to file
             File.WriteAllLines(path, lines);
             return true;
         }
-        /// <summary>
-        /// convert variables to text to write to file
-        /// type,name,value
-        /// </summary>
-        /// <returns></returns>
-        public string[] DataToLines()
+        public void Load()
         {
-            StringBuilder stringBuilder = new StringBuilder();
-            List<string> lines = new List<string>();
-            foreach (Type type in data.Keys)
-            {
-                foreach (string name in data[type].Keys.ToArray())
-                {
-                    stringBuilder.Append(type.FullName);
-                    stringBuilder.Append('■');
-                    stringBuilder.Append(name);
-                    stringBuilder.Append('■');
-                    stringBuilder.Append(data[type][name]);
-                    lines.Add(stringBuilder.ToString());
-                    stringBuilder.Clear();
-                }
-            }
-            return lines.ToArray();
+            throw new Exception();
         }
-        /// <summary>
-        /// Load data from disk.
-        /// </summary>
-        /// <param name="path">Load file path.</param>
-        /// <returns></returns>
-        public bool LoadFromFile(string path)
-        {
-            //check if file exists
-            if (!File.Exists(path)) return false;
-
-            //load file lines
-            string[] lines = File.ReadAllLines(path);
-
-            return LoadFromLines(lines);
-        }
-        /// <summary>
-        /// Load data from disk.
-        /// </summary>
-        /// <param name="lines">Load file path.</param>
-        /// <returns></returns>
-        public bool LoadFromLines(string[] lines)
-        {
-            //create new data set
-            Dictionary<Type, Dictionary<string, object>> newData = new Dictionary<Type, Dictionary<string, object>>();
-
-            //populate data
-            foreach (string line in lines)
-            {
-                //Try to get data from file line
-                try
-                {
-                    //Find splits
-                    int firstSplit = line.IndexOf("■");
-                    int secondSplit = line.IndexOf("■", firstSplit + 1);
-
-                    //Parse Type
-                    string typeText = line.Substring(0, firstSplit);
-                    Type type = Type.GetType(typeText);
-
-                    //Parse Name
-                    string name = line.Substring(firstSplit + 1, secondSplit - firstSplit - 1);
-
-                    //Parse Value
-                    string valueText = line.Substring(secondSplit + 1);
-                    object value = TextToType(valueText, type);
-
-
-                    //Add to new data set
-                    if (!newData.ContainsKey(type)) newData[type] = new Dictionary<string, object>();
-                    newData[type][name] = value;
-                }
-                catch
-                {
-                    
-                }
-            }
-
-            //once complete, replace the existing data set
-            data = newData;
-
-            return true;
-        }
-
-
-
-
-
-
-
-
-
-        #region Non-Primitives
-        public object TextToType(string text, Type toType)
-        {
-            switch (toType.Name)
-            {
-            //Insert special cases here
-            case "Vector2":
-                return TextToVector2(text);
-            case "Vector3":
-                return TextToVector3(text);
-            default:
-                return Convert.ChangeType(text, toType);
-            }
-        }
-        public Vector2 TextToVector2(string text)
-        {
-            string[] split = text.Trim('<').Trim('>').Replace(" ", "").Split(',');
-            float x = float.Parse(split[0]);
-            float y = float.Parse(split[1]);
-            return new Vector2(x, y);
-        }
-        public Vector3 TextToVector3(string text)
-        {
-            string[] split = text.Trim('<').Trim('>').Replace(" ", "").Split(',');
-            float x = float.Parse(split[0]);
-            float y = float.Parse(split[1]);
-            float z = float.Parse(split[2]);
-            return new Vector3(x, y, z);
-        }
-        #endregion
     }
 }
