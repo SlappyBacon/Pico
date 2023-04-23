@@ -102,7 +102,16 @@ namespace Pico.Files
                 action.Invoke(filePath);
             }
             if (!includeSubDirs) return;
-            var subDirs = Directory.GetDirectories(directory);
+
+            string[] subDirs;
+            try
+            {
+                subDirs = Directory.GetDirectories(directory);
+            }
+            catch
+            {
+                subDirs = new string[0];
+            }
             Task[] subDirTasks = new Task[subDirs.Length];
             for (int i = 0; i < subDirs.Length; i++)
             {
