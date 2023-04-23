@@ -73,7 +73,7 @@ namespace Pico.Files
         public static async Task<string[]> GetAllFilePathsAsync(string directory, bool includeSubDirs = false)
         {
             List<string> result = new List<string>(64);
-            await ForEachFilePath(directory, result.Add, includeSubDirs);
+            await ForEachFilePathAsync(directory, result.Add, includeSubDirs);
             return result.ToArray();
         }
 
