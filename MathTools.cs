@@ -46,10 +46,7 @@ namespace Pico.Maths
         /// </summary>
         /// <param name="number">Number to check.</param>
         /// <returns></returns>
-        public static bool FloatIsInt(float number)
-        {
-            return !number.ToString().Contains('.');
-        }
+        public static bool FloatIsInt(float number) => number % 1 == 0;
 
 
         /// <summary>
@@ -63,8 +60,7 @@ namespace Pico.Maths
             {
                 i++;
                 float divided = (float)num / i;
-                string dividedAsString = divided.ToString();
-                if (!dividedAsString.Contains('.')) return false;
+                if (FloatIsInt(divided)) return false;
             }
             return true;
         }
@@ -74,10 +70,7 @@ namespace Pico.Maths
         /// </summary>
         /// <param name="number">Number to check.</param>
         /// <returns></returns>
-        public static bool IntIsEven(int number)
-        {
-            return number % 2 == 0;
-        }
+        public static bool IntIsEven(int number) => number % 2 == 0;
 
 
 

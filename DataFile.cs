@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -73,16 +74,19 @@ namespace Pico.Data
             //if file exists, backup.  Overwrite old backup
             if (File.Exists(path)) File.Move(path, $"{path}.dbkp", true);
 
-            throw new Exception();
-            var lines = new string[0];
+            var json = JsonConvert.SerializeObject(data, Formatting.Indented);
 
             //write data to file
-            File.WriteAllLines(path, lines);
+            File.WriteAllText(path, json);
             return true;
         }
-        public void Load()
+        public void Load(string path)
         {
-            throw new Exception();
+            if (!File.Exists(path)) return;
+
+            var json = File.ReadAllText(path);
+
+            data = JsonConvert.DeserializeObject<Dictionary<Type, Dictionary<string, object>>>(json);
         }
     }
 }

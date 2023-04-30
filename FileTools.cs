@@ -70,24 +70,27 @@ namespace Pico.Files
         /// <param name="directory">Root directory.</param>
         /// <param name="includeSubDirs">Recursive?</param>
         /// <returns></returns>
-        public static async Task<string[]> GetAllFilePathsAsync(string directory, bool includeSubDirs = false)
+        public static string[] GetAllFilePaths(string directory, bool includeSubDirs = false, CancellationToken? ct = null)
         {
-            List<string> result = new List<string>(64);
-            await ForEachFilePathAsync(directory, result.Add, includeSubDirs);
+            List<string> result = new List<string>();
+            ForEachFilePath(directory, result.Add, includeSubDirs, ct);
             return result.ToArray();
         }
 
         /// <summary>
-        /// Iterates through each directory, and performs an action to each one.
+        /// Iterates through each file, and performs an action to each one.
         /// </summary>
         /// <param name="directory"></param>
         /// <param name="action"></param>
         /// <param name="includeSubDirs"></param>
         /// <returns></returns>
-        public static async Task ForEachFilePathAsync(string directory, Action<string> action, bool includeSubDirs = false)
+        public static void ForEachFilePath(string directory, Action<string> action, bool includeSubDirs = false, CancellationToken? ct = null)
         {
             if (directory == null) return;
             if (action == null) return;
+
+            if (!Directory.Exists(directory)) return;
+
             string[] filePaths;
             try
             {
@@ -97,30 +100,91 @@ namespace Pico.Files
             {
                 filePaths = new string[0];
             }
-            foreach (var filePath in filePaths)
-            {
-                action.Invoke(filePath);
-            }
-            if (!includeSubDirs) return;
 
-            string[] subDirs;
+            for (int i = 0; i < filePaths.Length; i++)
+            {
+                //Cancelled?
+                if (ct?.IsCancellationRequested == true) break;
+                var path = filePaths[i];
+                action.Invoke(path);
+            }
+
+            if (includeSubDirs)
+            {
+                string[] subDirs;
+                try
+                {
+                    subDirs = Directory.GetDirectories(directory);
+                }
+                catch
+                {
+                    subDirs = new string[0];
+                }
+
+                for (int i = 0; i < subDirs.Length; i++)
+                {
+                    //Cancelled?
+                    if (ct?.IsCancellationRequested == true) break;
+                    ForEachFilePath(subDirs[i], action, includeSubDirs, ct);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Iterates through each file, and performs an action to each one.
+        /// </summary>
+        /// <param name="directory"></param>
+        /// <param name="action"></param>
+        /// <param name="includeSubDirs"></param>
+        /// <returns></returns>
+        public static void ForEachFilePathParallel(string directory, Action<string> action, bool includeSubDirs = false, bool waitForFinish = false, CancellationToken? ct = null)
+        {
+            if (directory == null) return;
+            if (action == null) return;
+            if (!Directory.Exists(directory)) return;
+
+            string[] filePaths;
             try
             {
-                subDirs = Directory.GetDirectories(directory);
+                filePaths = Directory.GetFiles(directory);
             }
             catch
             {
-                subDirs = new string[0];
+                filePaths = new string[0];
             }
-            Task[] subDirTasks = new Task[subDirs.Length];
-            for (int i = 0; i < subDirs.Length; i++)
+
+
+            Task[] tasks = new Task[filePaths.Length];
+
+            for (int i = 0; i < filePaths.Length; i++)
             {
-                subDirTasks[i] = ForEachFilePathAsync(subDirs[i], action, includeSubDirs);
+                //Cancelled?
+                if (ct?.IsCancellationRequested == true) break;
+                var path = filePaths[i];
+                tasks[i] = Task.Run(() => action.Invoke(path));
             }
-            for (int i = 0; i < subDirs.Length; i++)
+
+            if (includeSubDirs)
             {
-                await subDirTasks[i];
+                string[] subDirs;
+                try
+                {
+                    subDirs = Directory.GetDirectories(directory);
+                }
+                catch
+                {
+                    subDirs = new string[0];
+                }
+
+                for (int i = 0; i < subDirs.Length; i++)
+                {
+                    //Cancelled?
+                    if (ct?.IsCancellationRequested == true) break;
+                    ForEachFilePathParallel(subDirs[i], action, includeSubDirs, waitForFinish, ct);
+                }
             }
+
+            if (waitForFinish) Task.WaitAll(tasks);
         }
 
 
@@ -180,7 +244,7 @@ namespace Pico.Files
         /// <param name="filePath1">File path one.</param>
         /// <param name="filePath2">File path two.</param>
         /// <returns></returns>
-        public static async Task<bool> FilesAreSameAsync(string filePath1, string filePath2)
+        public static bool FilesAreSame(string filePath1, string filePath2)
         {
             bool result = true;
 
@@ -354,6 +418,7 @@ namespace Pico.Files
         /// </summary>
         /// <param name="path">File path.</param>
         public static void PrintAllText(string path) => ForEachLine(path, Console.WriteLine);
+        
         /// <summary>
         /// A memory saving alternative to using File.ReadAllLines.  Preferrable for large text files.
         /// </summary>

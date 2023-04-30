@@ -151,7 +151,7 @@ namespace Pico.Twitch
         public void Dispose()
         {
             exit = true;
-            ThreadTools.JoinThread(pingThread);
+            pingThread.Join();
         }
 
     }
