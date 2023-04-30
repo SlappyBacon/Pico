@@ -37,6 +37,33 @@ namespace Pico.Files
                 }
             }
         }
+        public static List<T> LoadFindAll<T>(string directoryPath, Func<T, bool> determinant)
+        {
+            object padlock = new object();
+
+            List<T> result = new List<T>();
+
+            if (!Directory.Exists(directoryPath)) return result;
+            
+            FileTools.ForEachFilePathParallel(directoryPath, CheckPath, false, true);
+
+            return result;
+
+            void CheckPath(string filePath)
+            {
+                T loaded = Load<T>(filePath);
+
+                var match = determinant(loaded);
+
+                if (match)
+                {
+                    lock (padlock)
+                    {
+                        result.Add(loaded);
+                    }
+                }
+            }
+        }
 
         public static T Load<T>(string filePath)
         {
