@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Test2022
+namespace Pico.Networking
 {
     public class UdpNetComServer : IDisposable
     {
