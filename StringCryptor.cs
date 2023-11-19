@@ -14,7 +14,7 @@ namespace Pico.Cryptography
         /// <param name="key">The key.</param>
         /// <param name="keyIndex">The starting key index.</param>
         /// <returns>Encrypted byte array.</returns>
-        public static byte[] EncryptString(string text, byte[] key, int keyIndex = 0)
+        public static byte[] Encrypt(string text, byte[] key, int keyIndex = 0)
         {
             if (text == null || key == null || key.Length == 0) return null;
             if (keyIndex < 0 || keyIndex >= key.Length) keyIndex = 0;
@@ -31,7 +31,7 @@ namespace Pico.Cryptography
         /// <param name="key">The key.</param>
         /// <param name="keyIndex">The starting key index.</param>
         /// <returns>Decrypted string.</returns>
-        public static string DecryptString(byte[] bytes, byte[] key, int keyIndex = 0)
+        public static string Decrypt(byte[] bytes, byte[] key, int keyIndex = 0)
         {
             if (bytes == null || key == null || key.Length == 0) return null;
             if (keyIndex < 0 || keyIndex >= key.Length) keyIndex = 0;

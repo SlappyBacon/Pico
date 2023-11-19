@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +21,8 @@ namespace Pico.Files
         /// <param name="fileSize">File size, in bytes.</param>
         public static void CreateDummyFile(string outputPath, long fileSize = 1024)
         {
+            if (File.Exists(outputPath)) return;
+
             const int defaultBufferSize = 1024000;
             byte[] buffer;
             if (fileSize < defaultBufferSize)
@@ -54,7 +57,7 @@ namespace Pico.Files
         /// </summary>
         /// <param name="filePath">File path.</param>
         /// <returns>File name.</returns>
-        public static string FileName(string filePath)
+        public static string GetFileName(string filePath)
         {
             var slash = filePath.LastIndexOf('/');
             var bslash = filePath.LastIndexOf('\\');
@@ -212,12 +215,38 @@ namespace Pico.Files
         /// </summary>
         /// <param name="path">Path.</param>
         /// <returns>Formatted path.</returns>
-        public static string FormatPath(string path)
+        public static void FormatPath(ref string path, bool isDirectory = false)
         {
+            if (path == null) return;
+            
             path = path.Replace("\\", "/");
+            
             while (path.Contains("//")) path = path.Replace("//", "/");
-            return path;
+            
+            if (isDirectory && !path.EndsWith('/')) path += '/';
         }
+        /// <summary>
+        /// Formats text so there's only one '.' at the beginning.
+        /// </summary>
+        /// <param name="extention">Extention.</param>
+        /// <returns>Formatted path.</returns>
+        public static void FormatExtention(ref string extention)
+        {
+            if (extention == null)
+            {
+                extention = "";
+                return;
+            }
+            if (extention == "")
+            {
+                return;
+            }
+
+            //ONLY ONE DOT, AT START :)
+            extention = extention.Replace(".", "");
+            extention = extention.Insert(0, ".");
+        }
+
         /// <summary>
         /// Returns if the path ends with an image file extension.
         /// </summary>
@@ -247,10 +276,10 @@ namespace Pico.Files
         {
             bool result = true;
 
-            byte[] buffer1 = new byte[512000];
+            byte[] buffer1 = new byte[1024];
             FileStream reader1 = new FileStream(filePath1, FileMode.Open, FileAccess.Read);
 
-            byte[] buffer2 = new byte[512000];
+            byte[] buffer2 = new byte[1024];
             FileStream reader2 = new FileStream(filePath2, FileMode.Open, FileAccess.Read);
 
             int readCount1 = -1;
@@ -312,10 +341,10 @@ namespace Pico.Files
         /// <returns></returns>
         public static async Task<double> CompareFileBytesAsync(string filePath1, string filePath2)
         {
-            byte[] buffer1 = new byte[512000];
+            byte[] buffer1 = new byte[1024];
             FileStream reader1 = new FileStream(filePath1, FileMode.Open, FileAccess.Read);
 
-            byte[] buffer2 = new byte[512000];
+            byte[] buffer2 = new byte[1024];
             FileStream reader2 = new FileStream(filePath2, FileMode.Open, FileAccess.Read);
 
             bool isDone1 = false;
@@ -433,7 +462,7 @@ namespace Pico.Files
 
             FileStream fs = new FileStream(path, FileMode.Open);
 
-            byte[] buffer = new byte[1024000];
+            byte[] buffer = new byte[1024];
             while (true)
             {
                 var readCount = fs.Read(buffer, 0, buffer.Length);

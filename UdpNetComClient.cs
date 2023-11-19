@@ -18,17 +18,44 @@ namespace Pico.Networking
         CancellationTokenSource _cancelTokenSource;
         
         UdpNetCom _com;
+        bool _isRunning = false;
+        public bool IsRunning { get { return _isRunning; } }
+
+
         int _nextRequestId = 0;
         List<ComPacket> _comReplies = new List<ComPacket>();
         public int DebugComRepliesCount { get { return _comReplies.Count; } }
 
+        public UdpNetComClient() { }
         public UdpNetComClient(int port)
         {
+            Start(port);
+        }
+
+        
+        public void Start(int port)
+        {
+            if (IsRunning) return;
+            _isRunning = true;
+
             _cancelTokenSource = new CancellationTokenSource();
             _com = new UdpNetCom(port);
             Task.Run(() => AcceptReplies(_com, _cancelTokenSource.Token));
         }
         
+        public void Stop()
+        {
+            if (!IsRunning) return;
+            _isRunning = false;
+
+            _cancelTokenSource.Cancel();
+            _com.Dispose();
+            _cancelTokenSource.Dispose();
+        }
+
+
+
+
         public async Task<byte[]> SendRequest(IPEndPoint serverEndPoint, byte[] request)
         {
             if (_cancelTokenSource.IsCancellationRequested) return new byte[0];
@@ -59,7 +86,7 @@ namespace Pico.Networking
         {
             while (!cancelToken.IsCancellationRequested)
             {
-                var read = await netCom.ReadBytesAsync(null, 1000);
+                var read = await netCom.ReadBytesAsync(null, cancelToken);
                 if (read.RemoteEndPoint == null) continue;
                 ComPacket replyPacket = ComPacket.FromBytes(read.Buffer);
                 return replyPacket;
@@ -99,12 +126,8 @@ namespace Pico.Networking
 
         public void Dispose()
         {
-            Console.WriteLine("client disposing...");
-            _cancelTokenSource.Cancel();
-            _com.Dispose();
-            _cancelTokenSource.Dispose();
+            Stop();
         }
-
 
         public async Task DebugFloodRequests(IPEndPoint serverEndPoint, byte[] request, int count = 1)
         {

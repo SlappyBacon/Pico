@@ -5,6 +5,7 @@ namespace Pico.Benchmark
 {
 	public static class BenchmarkTools
     {
+        
         public static TimeSpan Benchmark(Action action, params object?[]? args)
         {
             DateTime start = DateTime.Now;
@@ -22,6 +23,12 @@ namespace Pico.Benchmark
             DateTime start = DateTime.Now;
             task.Start();
             task.Wait();
+            return DateTime.Now - start;
+        }
+        public static async Task<TimeSpan> BenchmarkAsync(Task task)
+        {
+            DateTime start = DateTime.Now;
+            await task;
             return DateTime.Now - start;
         }
     }

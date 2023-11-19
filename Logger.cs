@@ -1,49 +1,68 @@
-﻿using Pico.Streams;
+﻿using Pico.Files;
+using Pico.Streams;
 using System;
 using System.IO;
 namespace Pico.Logger
 {
-    public static class Logger
+    public class Logger : IDisposable
     {
         static object _logLock = new object();
-        static FileStream fileStream;
-        static string _outputPath = null;
-        public static string OutputPath 
-        { 
-            get { return _outputPath; } 
-            set { SetOutputPath(value); } 
+        static FileStream fileStream = null;
+
+        public Logger() { }
+        public Logger(string path)
+        {
+            SetOutputPath(path);
         }
 
-        static void SetOutputPath(string newOutputPath)
+        public void SetOutputPath(string path)
         {
             lock (_logLock)
             {
                 //Close existing stream, if open
                 //Try to open a new stream
 
-                if (newOutputPath == OutputPath) return;
                 fileStream?.Dispose();
-                _outputPath = newOutputPath;
-                if (OutputPath != null)
+
+                if (path != null)
                 {
-                    fileStream = new FileStream(OutputPath, FileMode.Append, FileAccess.Write);
+                    FileTools.FormatPath(ref path);
+                    fileStream = new FileStream(path, FileMode.Append, FileAccess.Write);
                 }
             }
         }
-
-        public static void Log(string text)
+        public void Write(string text, bool printToConsole = true)
         {
             lock (_logLock)
             {
                 //Write to console
-                Console.Write(text);
-                Console.Write('\n');
+                if (printToConsole) Console.WriteLine(text);
+
+                //Write to file?
+                if (fileStream == null) return;
+                if (!StreamTools.WriteText(fileStream, text)) return;
+                fileStream.Flush();
+            }
+        }
+        public void WriteLine(string text, bool printToConsole = true)
+        {
+            lock (_logLock)
+            {
+                //Write to console
+                if (printToConsole) Console.WriteLine(text);
 
                 //Write to file?
                 if (fileStream == null) return;
                 if (!StreamTools.WriteText(fileStream, text)) return;
                 if (!StreamTools.WriteText(fileStream, "\n")) return;
                 fileStream.Flush();
+            }
+        }
+        public void Dispose()
+        {
+            lock (_logLock)
+            {
+                fileStream?.Dispose();
             }
         }
     }

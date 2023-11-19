@@ -257,7 +257,7 @@ namespace Pico.Streams
         #region Write / Read File
         public static bool WriteFile(Stream stream, string file)
         {
-            file = FileTools.FormatPath(file);
+            FileTools.FormatPath(ref file);
             if (!File.Exists(file)) return false;
 
             long fileSize = new FileInfo(file).Length;
@@ -329,7 +329,7 @@ namespace Pico.Streams
         #region ENCRYPTED Write / Read File IMPLEMENT WITH BYTECRYPTOR
         public static bool EncryptedWriteFile(Stream stream, string file, byte[] key)
         {
-            file = FileTools.FormatPath(file);
+            FileTools.FormatPath(ref file);
             if (!File.Exists(file)) return false;
 
             long fileSize = new FileInfo(file).Length;

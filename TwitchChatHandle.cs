@@ -57,11 +57,13 @@ namespace Pico.Twitch
                 if (exit) return null;
 
                 read = TcpRead();
+
                 if (read == null)
                 {
                     Thread.Sleep(100);  //CPU says thank you :)
                     continue;
                 }
+
                 if (!read.Contains("PRIVMSG")) continue;
 
                 break; //Valid chat entry data
@@ -143,26 +145,27 @@ namespace Pico.Twitch
                     Thread.Sleep(1000);         
                     i++;
                 }
-                
             }
-
         }
 
         public void Dispose()
         {
             exit = true;
             pingThread.Join();
+            inputStream.Dispose();
+            outputStream.Dispose();
+            tcpClient.Dispose();
         }
 
     }
     public class TwitchChatEntry
     {
-        public string sender;
-        public string message;
-        public TwitchChatEntry(string Sender, string Message)
+        public readonly string Sender;
+        public readonly string Message;
+        public TwitchChatEntry(string sender, string message)
         {
-            sender = Sender;
-            message = Message;
+            Sender = sender;
+            Message = message;
         }
     }
 }

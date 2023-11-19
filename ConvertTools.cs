@@ -139,10 +139,8 @@ namespace Pico.Conversion
         /// <returns>Hex.</returns>
         public static string ByteToHex(byte num)
         {
-            Console.Write(num + " => ");
             string hexByte = num.ToString("X");
             if (hexByte.Length == 1) hexByte = "0" + hexByte;
-            Console.WriteLine(hexByte);
             return hexByte;
         }
         /// <summary>
@@ -153,12 +151,9 @@ namespace Pico.Conversion
         /// <returns>Byte.</returns>
         public static byte HexToByte(string hex)
         {
-            Console.Write(hex + " => ");
             try
             {
-                var b = Convert.ToByte(hex, 16);
-                Console.WriteLine(b);
-                return b;
+                return Convert.ToByte(hex, 16);
             }
             catch
             {

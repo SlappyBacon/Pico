@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Pico.MiscTypes
 {
-    class ObjectQueue<T>
+    class ItemQueue<T>
     {
         object _lock = new object();
         T[] _items;
@@ -18,7 +18,7 @@ namespace Pico.MiscTypes
         public int MaxCount { get { return _maxCount; } }
         public bool IsEmpty { get { return Count < 1; } }
         
-        public ObjectQueue(int maxCount = 100)
+        public ItemQueue(int maxCount = 100)
         {
             if (maxCount <= 0) maxCount = 100;
             _maxCount = maxCount;
@@ -96,7 +96,7 @@ namespace Pico.MiscTypes
             else return false;
         }
 
-        public void Shift(int amount = 1)
+        void Shift(int amount = 1)
         {
             if (amount < 1) return;
             

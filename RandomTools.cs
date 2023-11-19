@@ -17,8 +17,10 @@ namespace Pico.Randoms
         {
                 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
                 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-                'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6',
-                '7', '8', '9'
+                'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 
+                'H', 'I', 'J', 'K','L', 'M', 'N', 'O', 'P', 'Q', 'R', 
+                'S', 'T', 'U', 'V','W', 'X', 'Y', 'Z', '0', '1', '2', 
+                '3','4', '5', '6','7', '8', '9'
         };
 
 
@@ -54,12 +56,11 @@ namespace Pico.Randoms
         public static string RandomString(int length, char[] chars = null)
         {
             if (chars == null) chars = DefaultRandomStringChars;
-            StringBuilder text = new StringBuilder();
-            for (int i = 0; i < length;)
+            StringBuilder text = new StringBuilder(length);
+            for (int i = 0; i < length; i++)
             {
                 var rngChar = RandomChar(chars);
                 text.Append(rngChar);
-                i++;
             }
             return text.ToString();
         }
@@ -74,11 +75,10 @@ namespace Pico.Randoms
             //chars should never be null here.  Because otherwise
             //it would call char[] sample method insead.
             StringBuilder text = new StringBuilder();
-            for (int i = 0; i < length;)
+            for (int i = 0; i < length; i++)
             {
                 var rngChar = RandomChar(chars);
                 text.Append(rngChar);
-                i++;
             }
             return text.ToString();
         }

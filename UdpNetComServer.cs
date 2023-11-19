@@ -13,15 +13,24 @@ namespace Pico.Networking
     {
         object _comWriteLock = new object();
         CancellationTokenSource _cancelTokenSource;
-        Func<byte[], CancellationToken, byte[]> _getRequestReply = null;
+        Func<IPEndPoint, byte[], CancellationToken, byte[]> _getRequestReply = null;
         UdpNetCom _com;
+        bool _isRunning = false;
+        public bool IsRunning { get { return _isRunning; } }
 
-        public UdpNetComServer(int port, Func<byte[], CancellationToken, byte[]> getRequestReply)
+        public UdpNetComServer() { }
+        public UdpNetComServer(int port, Func<IPEndPoint, byte[], CancellationToken, byte[]> getRequestReply)
         {
+            Start(port, getRequestReply);
+        }
+
+        public void Start(int port, Func<IPEndPoint, byte[], CancellationToken, byte[]> getRequestReply)
+        {
+            if (IsRunning) return;
+            _isRunning = true;
+
             _com = new UdpNetCom(port);
-
             _cancelTokenSource = new CancellationTokenSource();
-
             if (getRequestReply == null)
             {
                 _getRequestReply = DefaultGetRequestReply;
@@ -29,6 +38,15 @@ namespace Pico.Networking
             else _getRequestReply = getRequestReply;
 
             Task.Run(() => AcceptRequests(_com, _cancelTokenSource.Token));
+        }
+        public void Stop()
+        {
+            if (!IsRunning) return;
+            _isRunning = false;
+
+            _cancelTokenSource.Cancel();
+            _com.Dispose();
+            _cancelTokenSource.Dispose();
         }
 
         async Task AcceptRequests(UdpNetCom netCom, CancellationToken cancelToken)
@@ -38,7 +56,7 @@ namespace Pico.Networking
             {
                 var nextRequest = await GetNextRequestAsync(netCom, cancelToken);
                 if (cancelToken.IsCancellationRequested) break;
-                var worker = Task.Run(() => ProcessRequest(netCom, nextRequest.Item1, nextRequest.Item2, cancelToken));
+                Task.Run(() => ProcessRequest(netCom, nextRequest.Item1, nextRequest.Item2, cancelToken));
             }
             Console.WriteLine("NOT ACCEPTING");
         }
@@ -47,7 +65,7 @@ namespace Pico.Networking
         {
             while (!cancelToken.IsCancellationRequested)
             {
-                var read = await netCom.ReadBytesAsync(null, 1000);
+                var read = await netCom.ReadBytesAsync(null, cancelToken);
                 if (read.RemoteEndPoint == null) continue;
                 ComPacket requestPacket = ComPacket.FromBytes(read.Buffer);
                 return (read.RemoteEndPoint, requestPacket);
@@ -60,7 +78,7 @@ namespace Pico.Networking
             //Console.WriteLine($"[{DateTime.Now}] [{sender.Address}:{sender.Port}] RX {requestPacket.Prefix}:{ArrayTools.ToString(requestPacket.Body)}");
             //Process request => reply bytes\\
             if (cancelToken.IsCancellationRequested) return;
-            var replyBytes = _getRequestReply.Invoke(requestPacket.Body, cancelToken);
+            var replyBytes = _getRequestReply.Invoke(sender, requestPacket.Body, cancelToken);
             var replyPacket = new ComPacket(requestPacket.Prefix, replyBytes);
             
             if (cancelToken.IsCancellationRequested) return;
@@ -80,13 +98,10 @@ namespace Pico.Networking
 
         public void Dispose()
         {
-            Console.WriteLine("server disposing...");
-            _cancelTokenSource.Cancel();
-            _com.Dispose();
-            _cancelTokenSource.Dispose();
+            Stop();
         }
 
-        byte[] DefaultGetRequestReply(byte[] request, CancellationToken cancelToken)
+        byte[] DefaultGetRequestReply(IPEndPoint sender, byte[] request, CancellationToken cancelToken)
         {
             //Return reply
             return new byte[] { 40 };

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Pico.ConsoleTools;
 
-class TextBox
+class TextBox : IDisposable
 {
     static object _padLock = new object();  //STATIC / SHARED
 
@@ -95,13 +95,26 @@ class TextBox
             ResetCursorPosition();
             for (int i = 0; i < StringBuilder.Capacity; i++)
             {
-                TryAppendChar(' ');
+                AppendChar(' ');
             }
             StringBuilder.Clear();
             ResetCursorPosition();
         }
     }
-    public bool TryAppendChar(char c)
+    void ConsoleAppendChar(char c)
+    {
+        var oldPos = Console.GetCursorPosition();
+        Console.SetCursorPosition(CursorGlobalX, CursorGlobalY);
+        var oldBg = Console.BackgroundColor;
+        var oldFg = Console.ForegroundColor;
+        Console.BackgroundColor = BackgroundColor;
+        Console.ForegroundColor = ForegroundColor;
+        Console.Write(c);
+        Console.BackgroundColor = oldBg;
+        Console.ForegroundColor = oldFg;
+        Console.SetCursorPosition(oldPos.Left, oldPos.Top);
+    }
+    public bool AppendChar(char c)
     {
         lock (_padLock)
         {
@@ -109,17 +122,14 @@ class TextBox
 
             StringBuilder.Append(c);
 
-            Console.SetCursorPosition(CursorGlobalX, CursorGlobalY);
-            Console.BackgroundColor = BackgroundColor;
-            Console.ForegroundColor = ForegroundColor;
-            Console.Write(c);
+            ConsoleAppendChar(c);
 
             NextCursorPosition();
 
             return true;
         }
     }
-    public bool TryRemoveLastChar()
+    public bool RemoveLastChar()
     {
         lock (_padLock)
         {
@@ -143,7 +153,7 @@ class TextBox
             Clear();
             for (int i = 0; i < newText.Length; i++)
             {
-                if (!TryAppendChar(newText[i])) break;
+                if (!AppendChar(newText[i])) break;
             }
         }
     }
@@ -165,6 +175,15 @@ class TextBox
             _foregroundColor = GetForegroundColor();
 
             SetText(Text);
+        }
+    }
+
+    public void Dispose()
+    {
+        lock ( _padLock)
+        {
+            SetBackgroundColor(Console.BackgroundColor);
+            Clear();
         }
     }
 }
