@@ -51,14 +51,12 @@ namespace Pico.Networking
 
         async Task AcceptRequests(UdpNetCom netCom, CancellationToken cancelToken)
         {
-            Console.WriteLine("ACCEPTING");
             while (!cancelToken.IsCancellationRequested)
             {
                 var nextRequest = await GetNextRequestAsync(netCom, cancelToken);
                 if (cancelToken.IsCancellationRequested) break;
                 Task.Run(() => ProcessRequest(netCom, nextRequest.Item1, nextRequest.Item2, cancelToken));
             }
-            Console.WriteLine("NOT ACCEPTING");
         }
 
         async Task<(IPEndPoint, ComPacket)> GetNextRequestAsync(UdpNetCom netCom, CancellationToken cancelToken)

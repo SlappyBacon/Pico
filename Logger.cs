@@ -2,68 +2,84 @@
 using Pico.Streams;
 using System;
 using System.IO;
+using Xamarin.Forms.Shapes;
+
 namespace Pico.Logger
 {
     public class Logger : IDisposable
     {
-        static object _logLock = new object();
-        static FileStream fileStream = null;
+        object _lock = new object();
+        FileStream _fileStream = null;
+        bool _timestamp = false;
+        string _filePath = null;
 
-        public Logger() { }
-        public Logger(string path)
-        {
-            SetOutputPath(path);
-        }
-
-        public void SetOutputPath(string path)
-        {
-            lock (_logLock)
+        FileStream FileStream { get { return _fileStream; } }
+        public string FilePath {
+            get { return _filePath; }
+            set
             {
-                //Close existing stream, if open
-                //Try to open a new stream
-
-                fileStream?.Dispose();
-
-                if (path != null)
+                lock (_lock)
                 {
-                    FileTools.FormatPath(ref path);
-                    fileStream = new FileStream(path, FileMode.Append, FileAccess.Write);
+                    FileTools.FormatPath(ref value);
+                    _filePath = value;
+
+                    //Close existing stream, if open
+                    FileStream?.Dispose();
+
+                    //Try to open a new stream
+                    if (FilePath == null) return;
+                    _fileStream = new FileStream(FilePath, FileMode.Append, FileAccess.Write);
                 }
             }
         }
+        public bool TimeStamp 
+        { 
+            get { return _timestamp; } 
+            set { _timestamp = value; }
+        }
+        string UtcTimeStamp { get { return DateTime.UtcNow.ToString(); } }
+        
+        public Logger() { }
+
         public void Write(string text, bool printToConsole = true)
         {
-            lock (_logLock)
+            lock (_lock)
             {
                 //Write to console
                 if (printToConsole) Console.WriteLine(text);
 
                 //Write to file?
-                if (fileStream == null) return;
-                if (!StreamTools.WriteText(fileStream, text)) return;
-                fileStream.Flush();
+                if (FileStream == null) return;
+                if (!StreamTools.WriteText(FileStream, text)) return;
+                FileStream.Flush();
             }
         }
         public void WriteLine(string text, bool printToConsole = true)
         {
-            lock (_logLock)
+            if (TimeStamp) text = $"[{UtcTimeStamp}] {text}";
+            lock (_lock)
             {
                 //Write to console
                 if (printToConsole) Console.WriteLine(text);
 
                 //Write to file?
-                if (fileStream == null) return;
-                if (!StreamTools.WriteText(fileStream, text)) return;
-                if (!StreamTools.WriteText(fileStream, "\n")) return;
-                fileStream.Flush();
+                if (FileStream == null) return;
+                if (!StreamTools.WriteText(FileStream, text)) return;
+                if (!StreamTools.WriteText(FileStream, "\n")) return;
+                FileStream.Flush();
             }
         }
         public void Dispose()
         {
-            lock (_logLock)
+            lock (_lock)
             {
-                fileStream?.Dispose();
+                FileStream?.Dispose();
             }
         }
+
+
+
+
+
     }
 }
