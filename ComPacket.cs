@@ -4,6 +4,7 @@ namespace Pico.Networking;
 
 public struct ComPacket
 {
+    
     public int Prefix;
     public byte[] Body;
 

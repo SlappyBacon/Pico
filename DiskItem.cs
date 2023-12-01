@@ -6,8 +6,23 @@ using Newtonsoft.Json;
 
 namespace Pico.Files
 {
+    /// <summary>
+    /// A collection of tools for 
+    /// saving, searching, and loading
+    /// objects to/from a disk.
+    /// </summary>
     public static class DiskItem
     {
+        /// <summary>
+        /// Searches files within a directory
+        /// and returns the first object that
+        /// matches search specifications.
+        /// </summary>
+        /// <typeparam name="T">Type.</typeparam>
+        /// <param name="directoryPath">Directory.</param>
+        /// <param name="determinant">Function which determines search behavior.</param>
+        /// <param name="item">Found item.</param>
+        /// <returns></returns>
         public static bool LoadFind<T>(string directoryPath, Func<T, bool> determinant, out T item)
         {
             if (!Directory.Exists(directoryPath))
@@ -43,6 +58,16 @@ namespace Pico.Files
                 }
             }
         }
+        /// <summary>
+        /// Searches files within a directory
+        /// and returns all objects that
+        /// match search specifications.
+        /// </summary>
+        /// <typeparam name="T">Type.</typeparam>
+        /// <param name="directoryPath">Directory.</param>
+        /// <param name="determinant">Function which determines search behavior.</param>
+        /// <param name="item">Found item.</param>
+        /// <returns></returns>
         public static List<T> LoadFindAll<T>(string directoryPath, Func<T, bool> determinant)
         {
             object padlock = new object();
@@ -72,7 +97,13 @@ namespace Pico.Files
                 }
             }
         }
-
+        /// <summary>
+        /// Loads file, then deserializes it.
+        /// </summary>
+        /// <typeparam name="T">Type.</typeparam>
+        /// <param name="filePath">File.</param>
+        /// <param name="item">Loaded item.</param>
+        /// <returns></returns>
         public static bool Load<T>(string filePath, out T item)
         {
             if (!File.Exists(filePath))
@@ -84,6 +115,13 @@ namespace Pico.Files
             var converted = FromJson(json, out item);
             return converted;
         }
+        /// <summary>
+        /// Serializes an object, then saves it to a file.
+        /// </summary>
+        /// <typeparam name="T">Type.</typeparam>
+        /// <param name="filePath">File.</param>
+        /// <param name="item">Item to save.</param>
+        /// <returns></returns>
         public static bool Save<T>(string filePath, in T item)
         {
             string json;
@@ -92,7 +130,13 @@ namespace Pico.Files
             File.WriteAllText(filePath, json);
             return true;
         }
-
+        /// <summary>
+        /// Converts object to JSON.
+        /// </summary>
+        /// <typeparam name="T">Type</typeparam>
+        /// <param name="item">Object to serialize.</param>
+        /// <param name="json">Serialized JSON.</param>
+        /// <returns></returns>
         static bool ToJson<T>(T item, out string json)
         {
             try
@@ -106,6 +150,13 @@ namespace Pico.Files
                 return false;
             }
         }
+        /// <summary>
+        /// Converts JSON to object.
+        /// </summary>
+        /// <typeparam name="T">Type.</typeparam>
+        /// <param name="json">JSON to deserialize.</param>
+        /// <param name="item">Deserialized object.</param>
+        /// <returns></returns>
         static bool FromJson<T>(string json, out T item)
         {
             try

@@ -80,6 +80,10 @@ namespace Pico.Data
             File.WriteAllText(path, json);
             return true;
         }
+        /// <summary>
+        /// Loads data from disk.
+        /// </summary>
+        /// <param name="path">Load file path.</param>
         public void Load(string path)
         {
             if (!File.Exists(path)) return;

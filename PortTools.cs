@@ -8,8 +8,16 @@ using System.Threading.Tasks;
 
 namespace Pico.Networking;
 
+/// <summary>
+/// A collection of port-related tools.
+/// </summary>
 public static class PortTools
 {
+    /// <summary>
+    /// Returns the next free port.
+    /// </summary>
+    /// <param name="port">Port to begin searching at.</param>
+    /// <returns></returns>
     public static int NextFreePort(int port = 0)
     {
         var properties = IPGlobalProperties.GetIPGlobalProperties();
@@ -17,6 +25,13 @@ public static class PortTools
         while (!IsFree(port, properties)) port += 1;
         return port;
     }
+
+    /// <summary>
+    /// Returns if the port is free.
+    /// </summary>
+    /// <param name="port">Port.</param>
+    /// <param name="properties">Properties.</param>
+    /// <returns></returns>
     public static bool IsFree(int port, IPGlobalProperties properties = null)
     {
         if (properties == null)

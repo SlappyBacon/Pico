@@ -122,6 +122,12 @@ namespace Pico.Print
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Converts number to percent text.
+        /// 1.1 becomes 110%
+        /// </summary>
+        /// <param name="num">Number.</param>
+        /// <returns></returns>
         public static string FormatPercent(double num)
         {
             //1 equals 100%
@@ -129,6 +135,12 @@ namespace Pico.Print
             return Math.Round(num, 2).ToString() + "%";
         }
 
+        /// <summary>
+        /// Converts number to dollars text.
+        /// 15.5 becomes $15.50
+        /// </summary>
+        /// <param name="dollars">Dollars.</param>
+        /// <returns></returns>
         public static string FormatDollars(double dollars)
         {
             return "$" + Math.Round(dollars, 2);

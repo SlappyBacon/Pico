@@ -5,8 +5,16 @@ using System.Text;
 
 namespace Pico.Randoms
 {
+    /// <summary>
+    /// A collection of random tools.
+    /// </summary>
 	public static class RandomTools
     {
+        /// <summary>
+        /// Rolls chance.
+        /// </summary>
+        /// <param name="percent">Percent. (0 - 1)</param>
+        /// <returns></returns>
         public static bool Chance(float percent) => Random.Shared.NextDouble() < percent;
         #region Random String
         //Must provide a length
@@ -164,6 +172,10 @@ namespace Pico.Randoms
         }
         #endregion
         #region Random Ip Address
+        /// <summary>
+        /// Generates a random IP address.
+        /// </summary>
+        /// <returns></returns>
         public static string RandomIpAddress()
         {
             //xxx.xxx.xxx.xxx

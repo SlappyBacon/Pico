@@ -53,6 +53,12 @@ namespace Pico.Networking
             return ip.Address.ToString();
         }
 
+        /// <summary>
+        /// Returns if a string is properly
+        /// formatted as an IP address.
+        /// </summary>
+        /// <param name="ipAddress"></param>
+        /// <returns></returns>
         public static bool IsValidIpAddress(string ipAddress)
         {
             //0.0.0.0         (7 chars)

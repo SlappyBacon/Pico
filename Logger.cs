@@ -1,4 +1,5 @@
 ﻿using Pico.Files;
+using Pico.Print;
 using Pico.Streams;
 using System;
 using System.IO;
@@ -6,6 +7,9 @@ using Xamarin.Forms.Shapes;
 
 namespace Pico.Logger
 {
+    /// <summary>
+    /// A tool for logging text.
+    /// </summary>
     public class Logger : IDisposable
     {
         object _lock = new object();
@@ -41,12 +45,16 @@ namespace Pico.Logger
         
         public Logger() { }
 
-        public void Write(string text, bool printToConsole = true)
+        /// <summary>
+        /// Writes text to log.
+        /// </summary>
+        /// <param name="text">Text.</param>
+        public void Write(string text)
         {
             lock (_lock)
             {
                 //Write to console
-                if (printToConsole) Console.WriteLine(text);
+                Console.WriteLine(text);
 
                 //Write to file?
                 if (FileStream == null) return;
@@ -54,13 +62,17 @@ namespace Pico.Logger
                 FileStream.Flush();
             }
         }
-        public void WriteLine(string text, bool printToConsole = true)
+        /// <summary>
+        /// Writes text to log.
+        /// </summary>
+        /// <param name="text">Text.</param>
+        public void WriteLine(string text)
         {
-            if (TimeStamp) text = $"[{UtcTimeStamp}] {text}";
+            if (TimeStamp) text = PrintTools.TimeStamp(text);
             lock (_lock)
             {
                 //Write to console
-                if (printToConsole) Console.WriteLine(text);
+                Console.WriteLine(text);
 
                 //Write to file?
                 if (FileStream == null) return;
@@ -69,6 +81,9 @@ namespace Pico.Logger
                 FileStream.Flush();
             }
         }
+        /// <summary>
+        /// Frees memory.
+        /// </summary>
         public void Dispose()
         {
             lock (_lock)

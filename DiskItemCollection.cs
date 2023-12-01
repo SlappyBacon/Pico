@@ -6,6 +6,12 @@ using Pico.Guid;
 
 namespace Pico.Files;
 
+/// <summary>
+/// A collection of tools for 
+/// saving, searching, and loading
+/// objects to/from a disk.  Each
+/// saved object gets assigned a GUID.
+/// </summary>
 class DiskItemCollection<T>
 {
     string _rootDirectory;
@@ -16,6 +22,13 @@ class DiskItemCollection<T>
     {
         _rootDirectory = Path.GetFullPath(rootDirectory);
     }
+
+    /// <summary>
+    /// Adds object,
+    /// then return its GUID.
+    /// </summary>
+    /// <param name="item">Object to add.</param>
+    /// <returns></returns>
     public string Add(in T item)
     {
         var guid = GuidGenerator.Next();
@@ -23,8 +36,31 @@ class DiskItemCollection<T>
         if (!saved) return null;
         return guid;
     }
+    
+    /// <summary>
+    /// Saves an object to the collection,
+    /// using a given GUID.
+    /// </summary>
+    /// <param name="guid">GUID to assign object.</param>
+    /// <param name="item">Object to save.</param>
+    /// <returns></returns>
     public bool Save(string guid, in T item) => DiskItem.Save(GetFilePath(guid), item);
+    
+    /// <summary>
+    /// Loads an object from the collection,
+    /// using a given GUID.
+    /// </summary>
+    /// <param name="guid">GUID to search for.</param>
+    /// <param name="item">Object loaded.</param>
+    /// <returns></returns>
     public bool Load(string guid, out T item) => DiskItem.Load(GetFilePath(guid), out item);
+
+    /// <summary>
+    /// Deletes an object from the collection,
+    /// using a given GUID.
+    /// </summary>
+    /// <param name="guid">GUID to use.</param>
+    /// <returns></returns>
     public bool Delete(string guid)
     {
         var filePath = GetFilePath(guid);
@@ -35,14 +71,35 @@ class DiskItemCollection<T>
 
     }
 
+    /// <summary>
+    /// Returns the first object in collection
+    /// that matches search specifications.
+    /// </summary>
+    /// <param name="determinant">Search behavior.</param>
+    /// <param name="item">Found object.</param>
+    /// <returns></returns>
     public bool LoadFind(Func<T, bool> determinant, out T item) => DiskItem.LoadFind(RootDirectory, determinant, out item);
+    
+    /// <summary>
+    /// Returns all objects in collection
+    /// that match search specifications.
+    /// </summary>
+    /// <param name="determinant">Search behavior.</param>
+    /// <param name="item">Found object.</param>
+    /// <returns></returns>
     public List<T> LoadFindAll(Func<T, bool> determinant) => DiskItem.LoadFindAll(RootDirectory, determinant);
 
+    /// <summary>
+    /// Returns if guid exists within collection.
+    /// </summary>
+    /// <param name="guid">GUID to search for.</param>
+    /// <returns></returns>
     public bool GuidExists(string guid)
     {
         var filePath = GetFilePath(guid);
         return File.Exists(filePath);
     }
+    
     string GetFilePath(string guid)
     {
         //New StringBuilder (root.length + guid.length + extention.length)

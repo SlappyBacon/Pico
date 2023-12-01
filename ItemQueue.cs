@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Pico.MiscTypes
 {
+    /// <summary>
+    /// Queue of objects.
+    /// </summary>
+    /// <typeparam name="T">Type.</typeparam>
     class ItemQueue<T>
     {
         object _lock = new object();
@@ -18,13 +22,21 @@ namespace Pico.MiscTypes
         public int MaxCount { get { return _maxCount; } }
         public bool IsEmpty { get { return Count < 1; } }
         
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="maxCount">Maximum queue size.</param>
         public ItemQueue(int maxCount = 100)
         {
             if (maxCount <= 0) maxCount = 100;
             _maxCount = maxCount;
             _items = new T[MaxCount];
         }
-        
+        /// <summary>
+        /// Adds object to back of queue.
+        /// </summary>
+        /// <param name="item">Object to add.</param>
+        /// <returns></returns>
         public bool Add(T item)
         {
             lock (_lock)
@@ -39,6 +51,11 @@ namespace Pico.MiscTypes
             }
         }
 
+        /// <summary>
+        /// Pops object from front of queue.
+        /// </summary>
+        /// <param name="item">Popped object.</param>
+        /// <returns></returns>
         public bool Pop(out T item)
         {
             lock (_lock)
@@ -57,6 +74,12 @@ namespace Pico.MiscTypes
             }
         }
 
+        /// <summary>
+        /// Pops objects from front of queue.
+        /// </summary>
+        /// <param name="amount">Amount of objects to pop.</param>
+        /// <param name="items">Popped objects.</param>
+        /// <returns></returns>
         public bool Pop(int amount, out T[] items)
         {
             if (amount < 1)
@@ -87,6 +110,11 @@ namespace Pico.MiscTypes
             }
         }
 
+        /// <summary>
+        /// Pops all objects from queue.
+        /// </summary>
+        /// <param name="items">Popped objects.</param>
+        /// <returns></returns>
         public bool PopAll(out T[] items)
         {
             if (Pop(Count, out items))
@@ -95,6 +123,7 @@ namespace Pico.MiscTypes
             }
             else return false;
         }
+
 
         void Shift(int amount = 1)
         {

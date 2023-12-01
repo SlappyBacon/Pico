@@ -5,7 +5,13 @@ namespace Pico.Benchmark
 {
 	public static class BenchmarkTools
     {
-        
+        /// <summary>
+        /// Benchmark an action.
+        /// Returns the time it takes to perform as a TimeSpan.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public static TimeSpan Benchmark(Action action, params object?[]? args)
         {
             DateTime start = DateTime.Now;

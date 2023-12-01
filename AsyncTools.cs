@@ -8,6 +8,16 @@ namespace Pico.AsyncTools
 {
     public static class AsyncTools
     {
+        /// <summary>
+        /// Takes an array of objects 
+        /// and performs an action to each.
+        /// A new task is created for each action
+        /// and is returned as an array.
+        /// </summary>
+        /// <typeparam name="T">Type.</typeparam>
+        /// <param name="array">Array of objects for the action to be performed on.</param>
+        /// <param name="action">Action to be performed on each object.</param>
+        /// <returns></returns>
         public static Task[] ForEachAsync<T>(T[] array, Action<T> action)
         {
             Task[] tasks = new Task[array.Length];

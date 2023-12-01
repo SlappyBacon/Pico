@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace Pico.MiscTypes
 {
+    /// <summary>
+    /// A tool for limiting the frequency of
+    /// things.  Example: API calls per minute.
+    /// </summary>
     class FrequencyLimiter
     {
         object _locker = new object();
@@ -20,6 +24,14 @@ namespace Pico.MiscTypes
         public int RequestsPerPeriodMax { get { return _requestsPerPeriodMax; } }
         public bool LimitReached { get { return RequestsThisPeriod == RequestsPerPeriodMax; } }
 
+        CancellationTokenSource _cts = new CancellationTokenSource();
+        CancellationTokenSource CTS => _cts;
+
+        /// <summary>
+        /// Creates new instance.
+        /// </summary>
+        /// <param name="maxPerPeriod">Maximum Next() calls per period.</param>
+        /// <param name="periodMs">Period time in milliseconds.</param>
         public FrequencyLimiter(int maxPerPeriod, int periodMs)
         {
             _periodMs = Math.Clamp(periodMs, 10, int.MaxValue);
@@ -31,38 +43,51 @@ namespace Pico.MiscTypes
                 DecrementAfterPeriod(divided * i);
             }
         }
-
-        public void Next(int timeoutMs = int.MaxValue)
-        {
-            if (timeoutMs < 1) return;
-            CancellationTokenSource cts = new CancellationTokenSource(timeoutMs);
-            Next(cts.Token);
-            cts.Dispose();
-        }
-        public void Next(CancellationToken ct)
+        /// <summary>
+        /// Waits for next available time,
+        /// then returns.
+        /// </summary>
+        public void Next()
         {
             lock (_locker)
             {
                 while (true)
                 {
                     if (!LimitReached) break;
-                    if (ct.IsCancellationRequested) return;
+                    if (CTS.IsCancellationRequested) return;
                     Thread.Sleep(1);
                 }
 
                 _requestsThisPeriod++;
-                DecrementAfterPeriod(PeriodMilliseconds, ct);
+                DecrementAfterPeriod(PeriodMilliseconds);
+            }
+        }
+
+        /// <summary>
+        /// Waits for next available time,
+        /// then returns.
+        /// </summary>
+        /// <param name="externalCancelToken">External, additional cancel token.</param>
+        public void Next(CancellationToken externalCancelToken)
+        {
+            lock (_locker)
+            {
+                while (true)
+                {
+                    if (!LimitReached) break;
+                    if (CTS.IsCancellationRequested) return;
+                    if (externalCancelToken.IsCancellationRequested) return;
+                    Thread.Sleep(1);
+                }
+
+                _requestsThisPeriod++;
+                DecrementAfterPeriod(PeriodMilliseconds);
             }
         }
 
         async Task DecrementAfterPeriod(int ms)
         {
-            await Task.Delay(ms);
-            _requestsThisPeriod--;
-        }
-        async Task DecrementAfterPeriod(int ms, CancellationToken ct)
-        {
-            await Task.Delay(ms, ct);
+            await Task.Delay(ms, CTS.Token);
             _requestsThisPeriod--;
         }
     }

@@ -87,6 +87,9 @@ class TextBox : IDisposable
         }
     }
 
+    /// <summary>
+    /// Clear text box.
+    /// </summary>
     public void Clear()
     {
         lock (_padLock)
@@ -114,6 +117,11 @@ class TextBox : IDisposable
         Console.ForegroundColor = oldFg;
         Console.SetCursorPosition(oldPos.Left, oldPos.Top);
     }
+    /// <summary>
+    /// Append character to end of text.
+    /// </summary>
+    /// <param name="c">Character.</param>
+    /// <returns></returns>
     public bool AppendChar(char c)
     {
         lock (_padLock)
@@ -129,6 +137,10 @@ class TextBox : IDisposable
             return true;
         }
     }
+    /// <summary>
+    /// Remove last character from end of text.
+    /// </summary>
+    /// <returns></returns>
     public bool RemoveLastChar()
     {
         lock (_padLock)
@@ -146,6 +158,10 @@ class TextBox : IDisposable
             return true;
         }
     }
+    /// <summary>
+    /// Overwrite text.
+    /// </summary>
+    /// <param name="newText">New text.</param>
     public void SetText(string newText)
     {
         lock (_padLock)
@@ -167,6 +183,10 @@ class TextBox : IDisposable
             return ConsoleColor.Black;
         }
     }
+    /// <summary>
+    /// Set background color.
+    /// </summary>
+    /// <param name="color">Color.</param>
     public void SetBackgroundColor(ConsoleColor color)
     {
         lock (_padLock)
