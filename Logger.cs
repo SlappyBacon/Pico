@@ -3,8 +3,6 @@ using Pico.Print;
 using Pico.Streams;
 using System;
 using System.IO;
-using Xamarin.Forms.Shapes;
-
 namespace Pico.Logger
 {
     /// <summary>
