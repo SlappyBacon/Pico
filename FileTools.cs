@@ -72,7 +72,7 @@ namespace Pico.Files
         /// <param name="directory">Root directory.</param>
         /// <param name="includeSubDirs">Recursive?</param>
         /// <returns></returns>
-        public static string[] GetAllFilePaths(string directory, bool includeSubDirs = false, CancellationToken? ct = null)
+        public static string[] GetAllFilePaths(string directory, bool includeSubDirs, CancellationToken ct)
         {
             List<string> result = new List<string>();
             ForEachFilePath(directory, result.Add, includeSubDirs, ct);
@@ -86,11 +86,10 @@ namespace Pico.Files
         /// <param name="action"></param>
         /// <param name="includeSubDirs"></param>
         /// <returns></returns>
-        public static void ForEachFilePath(string directory, Action<string> action, bool includeSubDirs = false, CancellationToken? ct = null)
+        public static void ForEachFilePath(string directory, Action<string> action, bool includeSubDirs, CancellationToken ct)
         {
             if (directory == null) return;
             if (action == null) return;
-
             if (!Directory.Exists(directory)) return;
 
             string[] filePaths;
@@ -106,7 +105,7 @@ namespace Pico.Files
             for (int i = 0; i < filePaths.Length; i++)
             {
                 //Cancelled?
-                if (ct?.IsCancellationRequested == true) break;
+                if (ct.IsCancellationRequested == true) break;
                 var path = filePaths[i];
                 action.Invoke(path);
             }
@@ -126,7 +125,7 @@ namespace Pico.Files
                 for (int i = 0; i < subDirs.Length; i++)
                 {
                     //Cancelled?
-                    if (ct?.IsCancellationRequested == true) break;
+                    if (ct.IsCancellationRequested == true) break;
                     ForEachFilePath(subDirs[i], action, includeSubDirs, ct);
                 }
             }
@@ -139,7 +138,7 @@ namespace Pico.Files
         /// <param name="action"></param>
         /// <param name="includeSubDirs"></param>
         /// <returns></returns>
-        public static void ForEachFilePathParallel(string directory, Action<string> action, bool includeSubDirs = false, bool waitForFinish = false, CancellationToken? ct = null)
+        public static async Task ForEachFilePathAsync(string directory, Action<string> action, bool includeSubDirs, bool waitForFinish, CancellationToken ct)
         {
             if (directory == null) return;
             if (action == null) return;
@@ -160,10 +159,9 @@ namespace Pico.Files
 
             for (int i = 0; i < filePaths.Length; i++)
             {
-                //Cancelled?
-                if (ct?.IsCancellationRequested == true) break;
+                if (ct.IsCancellationRequested) break;
                 var path = filePaths[i];
-                tasks[i] = Task.Run(() => action.Invoke(path));
+                tasks[i] = Task.Run(() => action.Invoke(path), ct);
             }
 
             if (includeSubDirs)
@@ -178,12 +176,15 @@ namespace Pico.Files
                     subDirs = new string[0];
                 }
 
+                Task[] subDirTasks = new Task[subDirs.Length];
+
                 for (int i = 0; i < subDirs.Length; i++)
                 {
-                    //Cancelled?
-                    if (ct?.IsCancellationRequested == true) break;
-                    ForEachFilePathParallel(subDirs[i], action, includeSubDirs, waitForFinish, ct);
+                    if (ct.IsCancellationRequested) break;
+                    subDirTasks[i] = ForEachFilePathAsync(subDirs[i], action, includeSubDirs, waitForFinish, ct);
                 }
+
+                if (waitForFinish) Task.WaitAll(subDirTasks);
             }
 
             if (waitForFinish) Task.WaitAll(tasks);

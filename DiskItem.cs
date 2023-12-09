@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 
 namespace Pico.Files
@@ -13,6 +15,29 @@ namespace Pico.Files
     /// </summary>
     public static class DiskItem
     {
+        /// <summary>
+        /// Iterates through files within a directory
+        /// and performs an action to each.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="directoryPath">Directory.</param>
+        /// <param name="doThis">Action to perform.</param>
+        public static async Task<int> ForEachItemAsync<T>(string directoryPath, Action<T, CancellationToken> doThis, CancellationToken ct)
+        {
+            int total = 0;
+            await FileTools.ForEachFilePathAsync(directoryPath, DirectoryPathAction, false, true, ct);
+            return total;
+            void DirectoryPathAction(string filePath)
+            {
+                if (ct.IsCancellationRequested) return;
+
+                T loadedItem;
+                bool didLoad = Load(filePath, out loadedItem);
+                if (!didLoad) return;
+                doThis(loadedItem, ct);
+                total++;
+            }
+        }
         /// <summary>
         /// Searches files within a directory
         /// and returns the first object that
@@ -31,31 +56,25 @@ namespace Pico.Files
                 return false;
             }
 
-            CancellationTokenSource cts = new CancellationTokenSource();
-            
             bool found = false;
             T foundItem = default;
-            FileTools.ForEachFilePathParallel(directoryPath, CheckPath, false, true, cts.Token);
-            if (found) item = foundItem;
-            else item = default;
-            
+
+            CancellationTokenSource cts = new CancellationTokenSource();
+            var task = ForEachItemAsync<T>(directoryPath, ItemAction, cts.Token);
+            task.Wait();
             cts.Dispose();
-            
+
+            item = foundItem;
             return found;
 
-            void CheckPath(string filePath)
+            void ItemAction(T item, CancellationToken ct)
             {
-                T loadedItem;
-                bool loaded = Load(filePath, out loadedItem);
-                if (!loaded) return;
+                if (ct.IsCancellationRequested) return;
 
-                var match = determinant(loadedItem);
-
-                if (match)
-                {
-                    foundItem = loadedItem;
-                    cts.Cancel();
-                }
+                if (!determinant(item)) return;
+                found = true;
+                foundItem = item;
+                cts.Cancel();
             }
         }
         /// <summary>
@@ -66,34 +85,28 @@ namespace Pico.Files
         /// <typeparam name="T">Type.</typeparam>
         /// <param name="directoryPath">Directory.</param>
         /// <param name="determinant">Function which determines search behavior.</param>
-        /// <param name="item">Found item.</param>
         /// <returns></returns>
         public static List<T> LoadFindAll<T>(string directoryPath, Func<T, bool> determinant)
         {
-            object padlock = new object();
-
             List<T> result = new List<T>();
 
             if (!Directory.Exists(directoryPath)) return result;
-            
-            FileTools.ForEachFilePathParallel(directoryPath, CheckPath, false, true);
+
+            var cts = new CancellationTokenSource();
+            var task = ForEachItemAsync<T>(directoryPath, ItemAction, cts.Token);
+            task.Wait();
+            cts.Dispose();
 
             return result;
 
-            void CheckPath(string filePath)
+            void ItemAction(T item, CancellationToken ct)
             {
-                T loadedItem;
-                bool loaded = Load(filePath, out loadedItem);
-                if (!loaded) return;
+                if (ct.IsCancellationRequested) return;
 
-                var match = determinant(loadedItem);
-
-                if (match)
+                if (!determinant(item)) return;
+                lock (result)
                 {
-                    lock (padlock)
-                    {
-                        result.Add(loadedItem);
-                    }
+                    result.Add(item);
                 }
             }
         }

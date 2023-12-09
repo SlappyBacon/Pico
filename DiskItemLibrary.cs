@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 namespace Pico.Files;
 
@@ -20,6 +21,11 @@ class DiskItemLibrary<T> : IDisposable
 
     bool _isDisposing = false;
     public bool IsDisposing => _isDisposing;
+
+    public string RootDirectory => Collection.RootDirectory;
+
+
+
 
     /// <summary>
     /// Creates a new instance within a directory.
@@ -44,6 +50,26 @@ class DiskItemLibrary<T> : IDisposable
             return Collection.Add(item);
         }
     }
+    /// <summary>
+    /// Deletes object.
+    /// </summary>
+    /// <param name="guid">GUID to search for.</param>
+    /// <returns></returns>
+    public bool TryDelete(string guid)
+    {
+        if (IsDisposing) return false;
+        lock (_padlock)
+        {
+            if (IsBorrowed(guid)) return false;
+            return Collection.Delete(guid);
+        }
+    }
+    
+    
+    
+    
+    
+    
     /// <summary>
     /// Copies object, without borrowing the original.
     /// </summary>
@@ -72,6 +98,38 @@ class DiskItemLibrary<T> : IDisposable
             return true;
         }
     }
+
+    /// <summary>
+    /// Copies object, without borrowing the original.
+    /// NOTE: Will load last saved state, even if the
+    /// object is currently borrowed, being modified, ect...
+    /// </summary>
+    /// <param name="guid">GUID to search for.</param>
+    /// <param name="item">Object copied.</param>
+    /// <returns></returns>
+    public bool TryCopyDirty(string guid, out T item)
+    {
+        //Does not "borrow" so you don't need to return the copy.
+        if (IsDisposing)
+        {
+            item = default;
+            return false;
+        }
+        lock (_padlock)
+        {
+            var loaded = Collection.Load(guid, out item);
+            if (!loaded) return false;
+
+            return true;
+        }
+    }
+
+
+
+
+
+
+
     /// <summary>
     /// Borrows object.
     /// </summary>
@@ -125,24 +183,15 @@ class DiskItemLibrary<T> : IDisposable
         } 
     }
     /// <summary>
-    /// Deletes object.
-    /// </summary>
-    /// <param name="guid">GUID to search for.</param>
-    /// <returns></returns>
-    public bool TryDelete(string guid)
-    {
-        if (IsDisposing) return false;
-        lock (_padlock)
-        {
-            if (IsBorrowed(guid)) return false;
-            return Collection.Delete(guid);
-        }
-    }
-    /// <summary>
     /// Returns if object with GUID exists within collection.
     /// </summary>
     /// <param name="guid">GUID to search for.</param>
     /// <returns></returns>
+    
+    
+    
+    
+    
     public bool GuidExists(string guid)
     {
         lock (_padlock)
@@ -162,6 +211,10 @@ class DiskItemLibrary<T> : IDisposable
             return BorrowedGuids.Contains(guid);
         }
     }
+
+
+
+
 
     /// <summary>
     /// Waits for all objects to be returned,
