@@ -103,7 +103,7 @@ namespace Pico.Print
         public static string TimeStamp(string text)
         {
             //$"[{time}] {message}"
-            DateTime now = DateTime.Now;
+            DateTime now = DateTime.UtcNow;
             StringBuilder sb = new StringBuilder(text.Length + 14);
             sb.Append('[');
             sb.Append(now.Hour);

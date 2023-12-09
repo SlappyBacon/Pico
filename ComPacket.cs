@@ -1,85 +1,64 @@
 ﻿using System;
-using System.Text;
-namespace Pico.Networking;
-
-public struct ComPacket
+using Pico.Arrays;
+namespace Pico.Networking
 {
-    
-    public int Prefix;
-    public byte[] Body;
-
-    //Creating a new packet
-    public ComPacket(int prefix, byte[] body)       //Manual bytes
+    public struct ComPacket
     {
-        this.Prefix = prefix;
-        this.Body = body;
-    }
-    public ComPacket(int prefix, string text = null) //Convert object? to bytes
-    {
-        this.Prefix = prefix;
-        if (text == null) Body = new byte[0];
-        else Body = ASCIIEncoding.ASCII.GetBytes(text);
-    }
-
-
-
-
-    //Packet / Data Conversion
-    public static ComPacket FromBytes(byte[] data)
-    {
-        if (data == null) return new ComPacket(0, new byte[] { });
-        if (data.Length < 4) return new ComPacket(0, new byte[] { });
-
-        var prefix = BitConverter.ToInt32(data, 0);
-
-        var body = new byte[data.Length - 4];
-        for (int i = 0; i < body.Length; i++)
+        public static readonly ComPacket Empty = new ComPacket(null, null);
+        public static ComPacket FromBytes(byte[] bytes)
         {
-            body[i] = data[i + 4];
+            if (bytes == null) return ComPacket.Empty;
+            byte[] guid = new byte[GuidSize];
+            byte[] body = new byte[bytes.Length - guid.Length];
+            for (int i = 0; i < guid.Length; i++)
+            {
+                guid[i] = bytes[i];
+            }
+            for (int i = 0; i < body.Length; i++)
+            {
+                body[i] = bytes[guid.Length + i];
+            }
+            return new ComPacket(guid, body);
         }
 
-        return new ComPacket(prefix, body);
-    }
-    public byte[] ToBytes()
-    {
-        //Check no body?
-        //[PREFIX]
-        if (Body == null) return BitConverter.GetBytes(Prefix);
+        static readonly int GuidSize = 4;
+        byte[] _guid = new byte[GuidSize];
+        byte[] _body;
 
-        //Is body.
-        //[PREFIX][BODY]
-        byte[] rawData = new byte[Body.Length + 4];
-        byte[] prefixBytes = BitConverter.GetBytes(Prefix); 
-        prefixBytes.CopyTo(rawData, 0);     //4 bytes
-        Body.CopyTo(rawData, 4);            //Remaining bytes
-        return rawData;
-    }
-
-    //Body Byte[] / Text Conversion
-    public void SetBodyText(string text)
-    {
-        if (text == null)
+        public byte[] GUID { get { return _guid; } }
+        public byte[] Body 
         {
-            Body = new byte[0];
-            return;
+            get { return _body; }
+            set { _body = value; }
         }
-        Body = ASCIIEncoding.ASCII.GetBytes(text);
+        public ComPacket(byte[] body)
+        {
+            Random.Shared.NextBytes(_guid);
+            _body = body;
+        }
+        public ComPacket(byte[] guid, byte[] body)
+        {
+            _guid = guid;
+            _body = body;
+        }
+        public byte[] ToBytes()
+        {
+            var result = new byte[GUID.Length + Body.Length];
+            for (int i = 0; i < GUID.Length; i++)
+            {
+                result[i] = GUID[i];
+            }
+            for (int i = 0; i < Body.Length; i++)
+            {
+                result[GUID.Length + i] = Body[i];
+            }
+            return result;
+        }
+        public override string ToString()
+        {
+            return $"{ArrayTools.ToString(GUID)}{ArrayTools.ToString(Body)}";
+        }
     }
-    public string GetBodyText() => ASCIIEncoding.ASCII.GetString(Body, 0, Body.Length);
-
-
-
-    //To String(s)
-    public override string ToString()
-    {
-        //[PREFIX] [X BYTES]
-        return $"[{Prefix}] {Body.Length + 4} Bytes";   //+4 bytes to account for prefix int.
-    }
-    public string ToStringTextBody()
-    {
-        //[PREFIX] "BODY TEXT"
-        return $"[{Prefix}] \"{GetBodyText()}\"";
-    }
-    
 }
-
+    
+    

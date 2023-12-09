@@ -36,13 +36,6 @@ namespace Pico.Logger
                 }
             }
         }
-        public bool TimeStamp 
-        { 
-            get { return _timestamp; } 
-            set { _timestamp = value; }
-        }
-        string UtcTimeStamp { get { return DateTime.UtcNow.ToString(); } }
-        
         public Logger() { }
 
         /// <summary>
@@ -66,9 +59,9 @@ namespace Pico.Logger
         /// Writes text to log.
         /// </summary>
         /// <param name="text">Text.</param>
-        public void WriteLine(string text)
+        public void WriteLine(string text, bool timeStamp = false)
         {
-            if (TimeStamp) text = PrintTools.TimeStamp(text);
+            if (timeStamp) text = PrintTools.TimeStamp(text);
             lock (_lock)
             {
                 //Write to console

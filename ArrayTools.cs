@@ -134,12 +134,29 @@ namespace Pico.Arrays
 
         #region Search
         /// <summary>
-        /// Find elements within an array.
+        /// Find first element within an array
+        /// that matches search specs.
+        /// </summary>
+        /// <param name="array">Array to search through.</param>
+        /// <param name="determinant">Function which defines what you're searching for.  Example, find first int less than 10: bool Determine(int num) => num < 10</param>
+        /// <returns></returns>
+        public static T Search<T>(T[] array, Func<T, bool> determinant)
+        {
+            for (int i = 0; i < array.Length; i++)
+            {
+                var element = (T)array.GetValue(i);
+                if (determinant.Invoke(element)) return element;
+            }
+            return default;
+        }
+        /// <summary>
+        /// Find all elements within an array
+        /// that match search specs.
         /// </summary>
         /// <param name="array">Array to search through.</param>
         /// <param name="determinant">Function which defines what you're searching for.  Example, find all ints less than 10: bool Determine(int num) => num < 10</param>
         /// <returns></returns>
-        public static T[] Search<T>(T[] array, Func<T, bool> determinant)
+        public static T[] SearchAll<T>(T[] array, Func<T, bool> determinant)
         {
             List<T> result = new List<T>();
             for (int i = 0; i < array.Length; i++)
