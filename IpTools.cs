@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System;
 using System.Threading.Tasks;
 using System.Net.Http;
+using Pico.Randoms;
 
 namespace Pico.Networking
 {
@@ -17,82 +18,32 @@ namespace Pico.Networking
         /// Returns this machine's local IP address
         /// </summary>
         /// <returns></returns>
-        public static string MyLocalIp()
+        public static IPAddress GetMyLocalIp()
         {
             var hostName = Dns.GetHostName();
             IPAddress[] addresses = Dns.GetHostAddresses(hostName);
-            if (addresses.Length > 0)
-            {
-                return addresses[addresses.Length - 1].ToString();
-            }
-            return null;
+            if (addresses.Length < 1) return null;
+            return addresses[addresses.Length - 1];
+            
         }
 
         /// <summary>
         /// Returns this machine's public IP address
         /// </summary>
         /// <returns></returns>
-
-        public static async Task<string> MyPublicIp(HttpClient httpClient = null)
+        public static async Task<IPAddress> GetMyPublicIpAsync()
         {
-            if (httpClient == null) httpClient = new HttpClient();
+            var httpClient = new HttpClient();
             var got = await httpClient.GetAsync("https://api.ipify.org");
-            return await got.Content.ReadAsStringAsync();
+            var ipAsString = await got.Content.ReadAsStringAsync();
+            httpClient.Dispose();
+            return IPAddress.Parse(ipAsString);
         }
-
-        /// <summary>
-        /// Returns a TcpClient's public IP address
-        /// </summary>
-        /// <returns></returns>
-        public static string ClientIp(TcpClient client)
+        public static IPAddress GetMyPublicIp()
         {
-            if (client == null) return null;
-            if (client.Client == null) return null;
-            if (client.Client.RemoteEndPoint == null) return null;
-            var ip = (IPEndPoint)client.Client.RemoteEndPoint;
-            return ip.Address.ToString();
+            var task = GetMyPublicIpAsync();
+            return task.Result;
         }
-
-        /// <summary>
-        /// Returns if a string is properly
-        /// formatted as an IP address.
-        /// </summary>
-        /// <param name="ipAddress"></param>
-        /// <returns></returns>
-        public static bool IsValidIpAddress(string ipAddress)
-        {
-            //0.0.0.0         (7 chars)
-            //999.999.999.999 (15 chars)
-            if (ipAddress.Length < 7) return false;
-            if (ipAddress.Length > 15) return false;
-
-            //Must be exactly 3 dots.
-            int dots = 0;
-
-            //All characters must be either a number, or '.'
-            for (int i = 0; i < ipAddress.Length; i++)
-            {
-                bool isDot = ipAddress[i] == '.';
-                if (
-                    ipAddress[i] != '0' &&
-                    ipAddress[i] != '1' &&
-                    ipAddress[i] != '2' &&
-                    ipAddress[i] != '3' &&
-                    ipAddress[i] != '4' &&
-                    ipAddress[i] != '5' &&
-                    ipAddress[i] != '6' &&
-                    ipAddress[i] != '7' &&
-                    ipAddress[i] != '8' &&
-                    ipAddress[i] != '9' &&
-                    !isDot
-                    ) return false;         //Invalid Character
-                if (isDot) dots++;          //Increment Dots Count
-            }
-
-            if (dots != 3) return false;    //Wrong amount of dots.
-
-            return true;    //Is Valid :)
-        }
-
+        
     }
 }

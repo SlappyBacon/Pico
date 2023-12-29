@@ -58,7 +58,7 @@ namespace Pico.Networking
             await Com.WriteBytesAsync(packet.ToBytes(), request.RemoteEndPoint);
             _totalRequestsHandled++;
 
-            Console.WriteLine($"[{TotalRequestsHandled}][{request.RemoteEndPoint.Address}:{request.RemoteEndPoint.Port}]{ArrayTools.ToString(packet.GUID)} {ArrayTools.ToString(packet.Body)}");
+            //Console.WriteLine($"[{TotalRequestsHandled}][{request.RemoteEndPoint.Address}:{request.RemoteEndPoint.Port}]{ArrayTools.ToString(packet.GUID)} {ArrayTools.ToString(packet.Body)}");
         }
 
         public void Dispose()

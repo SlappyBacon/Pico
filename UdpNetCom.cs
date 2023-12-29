@@ -20,10 +20,10 @@ class UdpNetCom : IDisposable
     { 
         get 
         {
-            if (_udpClient == null) return -1;
-            if (_udpClient.Client == null) return -1;
-            if (_udpClient.Client.LocalEndPoint == null) return -1;
-            var ipEp = (IPEndPoint)_udpClient.Client.LocalEndPoint;
+            if (UdpClient == null) return -1;
+            if (UdpClient.Client == null) return -1;
+            if (UdpClient.Client.LocalEndPoint == null) return -1;
+            var ipEp = (IPEndPoint)UdpClient.Client.LocalEndPoint;
             return ipEp.Port;
         } 
     }
@@ -169,15 +169,15 @@ class UdpNetCom : IDisposable
         var endpoint = new IPEndPoint(toAddress, toPort);
         return await WriteBytesAsync(bytes, endpoint);
     }
-    public async Task<int> WriteBytesAsync(byte[] bytes, IPEndPoint endpoint)
+    public async Task<int> WriteBytesAsync(byte[] bytes, IPEndPoint toEndPoint)
     {
         if (UdpClient == null) return 0;
         if (bytes == null) return 0;
-        if (endpoint == null) return 0;
+        if (toEndPoint == null) return 0;
         
         try
         {
-            return await UdpClient.SendAsync(bytes, bytes.Length, endpoint);
+            return await UdpClient.SendAsync(bytes, bytes.Length, toEndPoint);
         }
         catch
         {

@@ -29,6 +29,7 @@ namespace Pico.Networking
             listener.Start();
             var client = listener.AcceptTcpClient();
             listener.Stop();
+            listener.Dispose();
             return client;
         }
 

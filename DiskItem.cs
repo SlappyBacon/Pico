@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -104,6 +105,7 @@ namespace Pico.Files
                 if (ct.IsCancellationRequested) return;
 
                 if (!determinant(item)) return;
+
                 lock (result)
                 {
                     result.Add(item);

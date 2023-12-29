@@ -179,10 +179,10 @@ namespace Pico.Randoms
         public static string RandomIpAddress()
         {
             //xxx.xxx.xxx.xxx
-            var n1 = Random.Shared.Next(0, 1000);
-            var n2 = Random.Shared.Next(0, 1000);
-            var n3 = Random.Shared.Next(0, 1000);
-            var n4 = Random.Shared.Next(0, 1000);
+            var n1 = Random.Shared.Next(0, 256);
+            var n2 = Random.Shared.Next(0, 256);
+            var n3 = Random.Shared.Next(0, 256);
+            var n4 = Random.Shared.Next(0, 256);
             return $"{n1}.{n2}.{n3}.{n4}";
         }
         #endregion
