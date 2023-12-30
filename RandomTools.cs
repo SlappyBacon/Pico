@@ -91,6 +91,24 @@ namespace Pico.Randoms
             return text.ToString();
         }
         #endregion
+        #region Random String[]
+        /// <summary>
+        /// Returns a random string[] with given parameters.
+        /// </summary>
+        /// <param name="arrayLength">Length of array.</param>
+        /// <param name="textLength">Length of text.</param>
+        /// <returns></returns>
+        public static string[] RandomStringArray(int arrayLength, int textLength)
+        {
+            string[] result = new string[arrayLength];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = RandomTools.RandomString(textLength);
+            }
+            return result;
+        }
+        #endregion
+
         #region Random Byte Array
         /// <summary>
         /// Returns a random byte[]
