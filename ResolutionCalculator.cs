@@ -1,7 +1,7 @@
 ﻿using System;
 using Pico.Maths;
 
-namespace Pico.Media
+namespace Pico.Calculators
 {
     public static class ResolutionCalculator
     {

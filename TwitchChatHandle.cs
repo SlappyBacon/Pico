@@ -1,8 +1,4 @@
-﻿using Pico.Threads;
-using System;
-using System.IO;
-using System.Net.Sockets;
-using System.Threading;
+﻿using System.Net.Sockets;
 
 namespace Pico.Twitch
 {

@@ -1,10 +1,9 @@
 using System;
 using System.Threading.Tasks;
-using static System.Collections.Specialized.BitVector32;
 
-namespace Pico.Benchmark
+namespace Pico.Benchmarker
 {
-	public static class BenchmarkTools
+	public static class Benchmarker
     {
         public static double BenchmarkCompareAverage(Action oldAction, Action newAction, int count, params object?[]? args)
         {

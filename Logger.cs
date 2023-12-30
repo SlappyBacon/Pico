@@ -1,9 +1,9 @@
-﻿using Pico.Files;
-using Pico.Print;
+﻿using Pico.ConsoleTools;
+using Pico.Files;
 using Pico.Streams;
 using System;
 using System.IO;
-namespace Pico.Logger
+namespace Pico.Files
 {
     /// <summary>
     /// A tool for logging text.
