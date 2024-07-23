@@ -204,5 +204,15 @@ namespace Pico.Randoms
             return $"{n1}.{n2}.{n3}.{n4}";
         }
         #endregion
+
+        #region DateTime
+        public static DateTime RandomTime(DateTime start, DateTime end)
+        {
+            var maxSeconds = (end - start).TotalSeconds;
+            var randomSeconds = Random.Shared.NextDouble() * (double)maxSeconds;
+            var randomSpan = TimeSpan.FromSeconds(randomSeconds);
+            return start + randomSpan;
+        }
+        #endregion
     }
 }

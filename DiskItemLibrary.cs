@@ -37,7 +37,7 @@ class DiskItemLibrary<T> : IDisposable
         _borrowedGuids = new List<string>();
     }
     /// <summary>
-    /// Adds object,
+    /// Adds object with random GUID,
     /// then return its GUID.
     /// </summary>
     /// <param name="item">Object to add.</param>
@@ -48,6 +48,21 @@ class DiskItemLibrary<T> : IDisposable
         lock (_padlock)
         {
             return Collection.Add(item);
+        }
+    }
+    /// <summary>
+    /// Overwrites existing object,
+    /// or creates a new one.
+    /// </summary>
+    /// <param name="item">Object to add.</param>
+    /// <param name="guid">Manually set guid.</param>
+    /// <returns></returns>
+    public bool OverWrite(in T item, string guid)
+    {
+        if (IsDisposing) return false;
+        lock (_padlock)
+        {
+            return Collection.OverWrite(item, guid);
         }
     }
     /// <summary>

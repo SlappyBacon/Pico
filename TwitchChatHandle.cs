@@ -1,6 +1,6 @@
 ﻿using System.Net.Sockets;
 
-namespace Pico.Twitch
+namespace TwitchTools
 {
     public class TwitchChatHandle : IDisposable
     {

@@ -34,7 +34,7 @@ class DiskItemCollection<T>
 
 
     /// <summary>
-    /// Adds object,
+    /// Adds object with random GUID,
     /// then return its GUID.
     /// </summary>
     /// <param name="item">Object to add.</param>
@@ -42,10 +42,17 @@ class DiskItemCollection<T>
     public string Add(in T item)
     {
         var guid = GuidGenerator.Next();
-        var saved = Save(guid, item);
-        if (!saved) return null;
+        OverWrite(item, guid);
         return guid;
     }
+    /// <summary>
+    /// Overwrites existing object,
+    /// or creates a new one.
+    /// </summary>
+    /// <param name="item">Object to add.</param>
+    /// <param name="guid">Manually set guid.</param>
+    /// <returns></returns>
+    public bool OverWrite(in T item, string guid) => Save(guid, item);
     /// <summary>
     /// Deletes an object from the collection,
     /// using a given GUID.

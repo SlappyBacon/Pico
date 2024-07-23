@@ -19,9 +19,10 @@ namespace Pico.Cryptography
             if (text == null || key == null || key.Length == 0) return null;
             if (keyIndex < 0 || keyIndex >= key.Length) keyIndex = 0;
 
-
+            // Make a mem copy, don't modify the original bytes
             var bytes = Encoding.UTF8.GetBytes(text);
             ByteCryptor.Encrypt(bytes, key, ref keyIndex);
+
             return bytes;
         }
         /// <summary>
@@ -36,8 +37,13 @@ namespace Pico.Cryptography
             if (bytes == null || key == null || key.Length == 0) return null;
             if (keyIndex < 0 || keyIndex >= key.Length) keyIndex = 0;
 
-            ByteCryptor.Decrypt(bytes, key, ref keyIndex);
-            var text = Encoding.UTF8.GetString(bytes);
+            // Make a mem copy, don't modify the original bytes
+            byte[] dupedBytes = new byte[bytes.Length];
+            Array.Copy(bytes, 0, dupedBytes, 0, bytes.Length);
+
+            ByteCryptor.Decrypt(dupedBytes, key, ref keyIndex);
+            var text = Encoding.UTF8.GetString(dupedBytes);
+
             return text;
         }
     }
