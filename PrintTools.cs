@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace Pico.ConsoleTools
 {
@@ -39,7 +35,7 @@ namespace Pico.ConsoleTools
             if (beepHertz > 0 && !_isBeeping)
             {
                 beepMs = Math.Clamp(beepMs, 50, 2500);
-                
+
                 Task.Run(() =>
                 {
                     lock (_beepLock)

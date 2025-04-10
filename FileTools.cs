@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Pico.Files
 {
@@ -219,11 +213,11 @@ namespace Pico.Files
         public static void FormatPath(ref string path, bool isDirectory = false)
         {
             if (path == null) return;
-            
+
             path = path.Replace("\\", "/");
-            
+
             while (path.Contains("//")) path = path.Replace("//", "/");
-            
+
             if (isDirectory && !path.EndsWith('/')) path += '/';
         }
         /// <summary>
@@ -447,7 +441,7 @@ namespace Pico.Files
         /// </summary>
         /// <param name="path">File path.</param>
         public static void PrintAllText(string path) => ForEachLine(path, Console.WriteLine);
-        
+
         /// <summary>
         /// A memory saving alternative to using File.ReadAllLines.  Preferrable for large text files.
         /// </summary>
@@ -458,7 +452,7 @@ namespace Pico.Files
             const byte nextLineCharByte = (byte)'\n';
 
             if (!File.Exists(path)) return;
-            
+
             StringBuilder sb = new StringBuilder();
 
             FileStream fs = new FileStream(path, FileMode.Open);

@@ -1,11 +1,4 @@
 using System.Net;
-using System.Collections.Generic;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System;
-using System.Threading.Tasks;
-using System.Net.Http;
-using Pico.Randoms;
 
 namespace Pico.Networking
 {
@@ -24,7 +17,7 @@ namespace Pico.Networking
             IPAddress[] addresses = Dns.GetHostAddresses(hostName);
             if (addresses.Length < 1) return null;
             return addresses[addresses.Length - 1];
-            
+
         }
 
         /// <summary>
@@ -44,6 +37,6 @@ namespace Pico.Networking
             var task = GetMyPublicIpAsync();
             return task.Result;
         }
-        
+
     }
 }

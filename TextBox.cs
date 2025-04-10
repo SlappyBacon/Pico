@@ -9,7 +9,7 @@ class TextBox : IDisposable
     StringBuilder _sb;
     StringBuilder StringBuilder { get { return _sb; } }
     public string Text { get { return _sb.ToString(); } }
-    
+
     int _xOrigin, _yOrigin, _width, _height, _cursorLocalX, _cursorLocalY;
     public int OriginX { get { return _xOrigin; } }
     public int OriginY { get { return _yOrigin; } }
@@ -196,7 +196,7 @@ class TextBox : IDisposable
 
     public void Dispose()
     {
-        lock ( _padLock)
+        lock (_padLock)
         {
             SetBackgroundColor(Console.BackgroundColor);
             Clear();

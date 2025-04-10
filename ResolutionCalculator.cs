@@ -1,5 +1,4 @@
-﻿using System;
-using Pico.Maths;
+﻿using Pico.Maths;
 
 namespace Pico.Calculators
 {

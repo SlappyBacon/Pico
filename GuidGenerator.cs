@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace Pico.Guid;
 
@@ -18,7 +14,7 @@ public static class GuidGenerator
     public static byte Size
     {
         get { return _size; }
-        set 
+        set
         {
             //Size must be greater/equal to 4 characters
             if (value < 4) value = 4;
@@ -43,14 +39,14 @@ public static class GuidGenerator
             _builder = new StringBuilder(Size);
         }
     }
-    
+
     public static string Next(string sampleString = null)
     {
         lock (_lock)
         {
             //Determine samples
             if (sampleString == null) sampleString = DefaultSamples;
-            
+
             //Generate
             Builder.Clear();
             for (int i = 0; i < Size; i++)

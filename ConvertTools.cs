@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Text;
+﻿using System.Text;
 
 namespace Pico.Conversion
 {
@@ -120,7 +118,7 @@ namespace Pico.Conversion
         public static byte[] HexToByteArray(string hex)
         {
             if (hex.Length % 2 != 0) return new byte[0];
-            byte[] array = new byte[hex.Length/2];
+            byte[] array = new byte[hex.Length / 2];
             for (int i = 0; i < array.Length;)
             {
                 string c = hex.Substring(i * 2, 2);

@@ -8,17 +8,17 @@ class UdpNetCom : IDisposable
     // Create a new UdpClient and bind it to a local endpoint
     UdpClient _udpClient;
     UdpClient UdpClient { get { return _udpClient; } }
-    
-    public int Port 
-    { 
-        get 
+
+    public int Port
+    {
+        get
         {
             if (UdpClient == null) return -1;
             if (UdpClient.Client == null) return -1;
             if (UdpClient.Client.LocalEndPoint == null) return -1;
             var ipEp = (IPEndPoint)UdpClient.Client.LocalEndPoint;
             return ipEp.Port;
-        } 
+        }
     }
 
     public const int DefaultTimeoutMilliseconds = 2000;
@@ -167,7 +167,7 @@ class UdpNetCom : IDisposable
         if (UdpClient == null) return 0;
         if (bytes == null) return 0;
         if (toEndPoint == null) return 0;
-        
+
         try
         {
             return await UdpClient.SendAsync(bytes, bytes.Length, toEndPoint);

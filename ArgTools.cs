@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 
 namespace Pico.Args
 {
@@ -18,11 +17,11 @@ namespace Pico.Args
             //Find find
             int found = IndexOf(args, find);
             if (found <= -1) return "";   //Not found
-            if (found >= args.Length-1) return "";   //Found, but last arg
+            if (found >= args.Length - 1) return "";   //Found, but last arg
 
             //Check for start quote
             int start = found + 1;
-            
+
             if (!args[start].StartsWith('\"')) return args[start];
 
             //find end quote

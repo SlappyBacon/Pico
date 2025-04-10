@@ -77,7 +77,7 @@ namespace TwitchTools
             startIndex = read.IndexOf(":", 1) + 1;
             string chatMessage = read.Substring(startIndex);
 
-            return new TwitchChatEntry(chatSender,chatMessage);
+            return new TwitchChatEntry(chatSender, chatMessage);
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace TwitchTools
                 for (int i = 0; i < 300; i++)
                 {
                     if (exit) return;
-                    Thread.Sleep(1000);         
+                    Thread.Sleep(1000);
                     i++;
                 }
             }

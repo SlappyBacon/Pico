@@ -177,6 +177,6 @@ namespace Pico.Files
                 item = default(T);
                 return false;
             }
-        } 
+        }
     }
 }

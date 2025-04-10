@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Pico.Media
+﻿namespace Pico.Media
 {
     //Width x Height x Framerate x BPP = bps
     public static class BitrateCalculator

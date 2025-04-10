@@ -1,9 +1,6 @@
-using System;
-using System.Threading.Tasks;
-
 namespace Pico.Benchmarker
 {
-	public static class Benchmarker
+    public static class Benchmarker
     {
         /*public static double BenchmarkCompareParallel(Action oldAction, Action newAction, int count, params object?[]? args)
         {

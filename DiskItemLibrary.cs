@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Threading;
-namespace Pico.Files;
+﻿namespace Pico.Files;
 
 /// <summary>
 /// A collection of tools for 
@@ -79,12 +75,12 @@ class DiskItemLibrary<T> : IDisposable
             return Collection.Delete(guid);
         }
     }
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
     /// <summary>
     /// Copies object, without borrowing the original.
     /// </summary>
@@ -195,18 +191,18 @@ class DiskItemLibrary<T> : IDisposable
             BorrowedGuids.Remove(guid);
 
             return true;
-        } 
+        }
     }
     /// <summary>
     /// Returns if object with GUID exists within collection.
     /// </summary>
     /// <param name="guid">GUID to search for.</param>
     /// <returns></returns>
-    
-    
-    
-    
-    
+
+
+
+
+
     public bool GuidExists(string guid)
     {
         lock (_padlock)

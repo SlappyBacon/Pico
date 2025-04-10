@@ -1,11 +1,8 @@
-using Pico.Conversion;
-using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Pico.Arrays
 {
-	public static class ArrayTools
+    public static class ArrayTools
     {
         #region Compare
         /// <summary>
@@ -88,12 +85,12 @@ namespace Pico.Arrays
                     //If a swap is made, flag 'not done' to repeat the process
                     switch (highToLow)
                     {
-                        case false:
-                            if (values[i + 1] < values[i]) Swap(i, i + 1);
-                            break;
-                        case true: //Largest to smallest
-                            if (values[i + 1] > values[i]) Swap(i, i + 1);
-                            break;
+                    case false:
+                        if (values[i + 1] < values[i]) Swap(i, i + 1);
+                        break;
+                    case true: //Largest to smallest
+                        if (values[i + 1] > values[i]) Swap(i, i + 1);
+                        break;
                     }
                 }
                 if (done) break;

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Pico.Cryptography
+﻿namespace Pico.Cryptography
 {
     /// <summary>
     /// Simple ecryption, but it's something.
@@ -85,7 +78,7 @@ namespace Pico.Cryptography
         /// <returns></returns>
         public static void Decrypt(byte[] bytes, byte[] key, ref int keyIndex)
         {
-            if (bytes == null ||  bytes.Length == 0) return;
+            if (bytes == null || bytes.Length == 0) return;
             if (key == null || key.Length == 0) return;
             if (keyIndex < 0 || keyIndex >= key.Length) keyIndex = 0;
 

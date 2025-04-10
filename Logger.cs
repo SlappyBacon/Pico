@@ -1,8 +1,5 @@
 ﻿using Pico.ConsoleTools;
-using Pico.Files;
 using Pico.Streams;
-using System;
-using System.IO;
 namespace Pico.Files
 {
     /// <summary>
@@ -16,7 +13,8 @@ namespace Pico.Files
         string _filePath = null;
 
         FileStream FileStream { get { return _fileStream; } }
-        public string FilePath {
+        public string FilePath
+        {
             get { return _filePath; }
             set
             {

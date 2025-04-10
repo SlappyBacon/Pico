@@ -307,7 +307,7 @@ namespace Pico.Streams
 
                         //Write bytes chunk to file
                         writeStream.Write(buffer, 0, readByteCount);
-                        
+
                         //Check if end of file
                         if (remainingBytes < 1) break;
 

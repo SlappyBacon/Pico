@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using Pico.Guid;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Pico.Guid;
 
 namespace Pico.Files;
 
@@ -68,7 +63,7 @@ class DiskItemCollection<T>
         return true;
 
     }
-    
+
 
 
 
@@ -81,7 +76,7 @@ class DiskItemCollection<T>
     /// <param name="item">Object to save.</param>
     /// <returns></returns>
     public bool Save(string guid, in T item) => DiskItem.Save(GetFilePath(guid), item);
-    
+
     /// <summary>
     /// Loads an object from the collection,
     /// using a given GUID.
@@ -101,7 +96,7 @@ class DiskItemCollection<T>
         var filePath = GetFilePath(guid);
         return File.Exists(filePath);
     }
-    
+
     string GetFilePath(string guid)
     {
         //New StringBuilder (root.length + guid.length + extention.length)
