@@ -12,18 +12,19 @@ namespace Pico.Arrays
         /// <param name="arr1">First array.</param>
         /// <param name="arr2">Second array.</param>
         /// <returns></returns>
-        public static bool Compare(byte[] arr1, byte[] arr2)
+        public static bool Compare<T>(T[] arr1, T[] arr2) where T : IComparable
         {
+            if (arr1 == null && arr2 == null) return true;
 
-            if (arr1 == null && arr2 == null) return true;  //Both null
-            if (arr1 == null && arr2 != null) return false; //One null
-            if (arr2 == null && arr1 != null) return false; //One null
+            if (arr1 == null) return false;
+            if (arr2 == null) return false;
 
             if (arr1.Length != arr2.Length) return false;
 
             for (int i = 0; i < arr1.Length; i++)
             {
-                if (arr1[i] != arr2[i]) return false;
+                bool elementIsSame = arr1[i].CompareTo(arr2[i]) == 0;
+                if (!elementIsSame) return false;
             }
 
             return true;
@@ -225,8 +226,6 @@ namespace Pico.Arrays
             Console.WriteLine(text);
         }
         #endregion
-
-
 
         #region PrintCompare
         /// <summary>
