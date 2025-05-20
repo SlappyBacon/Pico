@@ -49,8 +49,11 @@ namespace Pico.Conversion
         #endregion
         #region String - Binary String
         /// <summary>
-        /// Splits a string into characters, then constructs a binary string.
+        /// Converts a normal string to a binary string of 1s and 0s.
         /// </summary>
+        /// <remarks>
+        /// NOTE: A char is only one byte.  The binary representation of one char is eight chars, effectively 8x memory usage.
+        /// </remarks>
         /// <param name="text"></param>
         /// <returns></returns>
 
@@ -72,8 +75,11 @@ namespace Pico.Conversion
             return result;
         }
         /// <summary>
-        /// Splits a binary string into binary characters, then constructs a normal string.
+        /// Converts a binary string of 1s and 0s to a normal string.
         /// </summary>
+        /// <remarks>
+        /// NOTE: A char is only one byte.  The binary representation of one char is eight chars, effectively 8x memory usage.
+        /// </remarks>
         /// <param name="binary"></param>
         /// <returns></returns>
         public static string BinaryToString(string binary)
@@ -93,12 +99,14 @@ namespace Pico.Conversion
         #endregion
         #region Byte(s) - Hex
         /// <summary>
-        /// Converts each byte to one two-char hex word.
-        /// (0 to 255) => (00 to FF)
+        /// Converts bytes to a string of two-char hex words. (0 to 255 => 00 to FF)
         /// </summary>
+        /// <remarks>
+        /// NOTE: A char is only one byte.  A hex word is two chars, effectively doubling memory usage.
+        /// </remarks>
         /// <param name="array">Bytes to convert.</param>
-        /// <returns>Hex.</returns>
-        public static string ByteArrayToHex(byte[] array)
+        /// <returns>String of hex words.</returns>
+        public static string BytesToHex(byte[] array)
         {
             StringBuilder hex = new StringBuilder();
             for (int i = 0; i < array.Length;)
@@ -110,12 +118,14 @@ namespace Pico.Conversion
             return hex.ToString();
         }
         /// <summary>
-        /// Converts each two-char hex word to one byte.
-        /// (00 to FF) => (0 to 255) 
+        /// Converts a string of two-char hex words to bytes. (00 to FF => 0 to 255)
         /// </summary>
+        /// <remarks>
+        /// NOTE: A char is only one byte.  A hex word is two chars, effectively doubling memory usage.
+        /// </remarks>
         /// <param name="hex">Hex to convert.</param>
         /// <returns>Bytes.</returns>
-        public static byte[] HexToByteArray(string hex)
+        public static byte[] HexToBytes(string hex)
         {
             if (hex.Length % 2 != 0) return new byte[0];
             byte[] array = new byte[hex.Length / 2];
@@ -129,23 +139,27 @@ namespace Pico.Conversion
             return array;
         }
         /// <summary>
-        /// Converts one byte to one two-char hex word.
-        /// (0 to 255) => (00 to FF)
+        /// Converts one byte to one two-char hex word. (0 to 255 => 00 to FF)
         /// </summary>
-        /// <param name="num">Byte to convert.</param>
-        /// <returns>Hex.</returns>
-        public static string ByteToHex(byte num)
+        /// <remarks>
+        /// NOTE: A char is only one byte.  A hex word is two chars, effectively doubling memory usage.
+        /// </remarks>
+        /// <param name="b">Byte to convert.</param>
+        /// <returns>One hex word.</returns>
+        public static string ByteToHex(byte b)
         {
-            string hexByte = num.ToString("X");
+            string hexByte = b.ToString("X");
             if (hexByte.Length == 1) hexByte = "0" + hexByte;
             return hexByte;
         }
         /// <summary>
-        /// Converts one two-char hex word to one byte.
-        /// (00 to FF) => (0 to 255) 
+        /// Converts one two-char hex word to one byte. (00 to FF => 0 to 255)
         /// </summary>
+        /// <remarks>
+        /// NOTE: A char is only one byte.  A hex word is two chars, effectively doubling memory usage.
+        /// </remarks>
         /// <param name="hex">Hex to convert.</param>
-        /// <returns>Byte.</returns>
+        /// <returns>One byte.</returns>
         public static byte HexToByte(string hex)
         {
             try
@@ -154,8 +168,7 @@ namespace Pico.Conversion
             }
             catch
             {
-                Console.WriteLine("fail");
-                return 0;
+                throw new Exception("HexToByte: Invalid Hex Word.");
             }
         }
         #endregion
