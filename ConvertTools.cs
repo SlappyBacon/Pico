@@ -47,7 +47,8 @@ namespace Pico.Conversion
             return result;
         }
         #endregion
-        #region String - Binary String
+
+        #region String - Binary
         /// <summary>
         /// Converts a normal string to a binary string of 1s and 0s.
         /// </summary>
@@ -96,7 +97,96 @@ namespace Pico.Conversion
             }
             return result;
         }
+
+
+
         #endregion
+
+        #region Byte(s) - Binary
+
+        /// <summary>
+        /// Converts bytes to a binary string of 1s and 0s.
+        /// </summary>
+        /// <remarks>
+        /// NOTE: The binary representation of one byte is eight chars, effectively 8x memory usage.
+        /// </remarks>
+        /// <param name="array">Bytes to convert.</param>
+        /// <returns>Binary words.</returns>
+        public static string BytesToBinary(byte[] array)
+        {
+            StringBuilder binary = new StringBuilder(array.Length * 8);
+            for (int i = 0; i < array.Length;)
+            {
+                string binaryByte = ByteToBinary(array[i]);
+                binary.Append(binaryByte);
+                i++;
+            }
+            return binary.ToString();
+        }
+
+        /// <summary>
+        /// Converts a binary string of 1s and 0s to bytes.
+        /// </summary>
+        /// <remarks>
+        /// NOTE: The binary representation of one byte is eight chars, effectively 8x memory usage.
+        /// </remarks>
+        /// <param name="binary">Binary words to convert.</param>
+        /// <returns>Bytes.</returns>
+        public static byte[] BinaryToBytes(string binary)
+        {
+            if (binary.Length % 8 != 0) return new byte[0];
+            byte[] array = new byte[binary.Length / 8];
+            for (int i = 0; i < array.Length;)
+            {
+                string c = binary.Substring(i * 8, 8);
+                var b = BinaryToByte(c);
+                array[i] = b;
+                i++;
+            }
+            return array;
+        }
+
+        /// <summary>
+        /// Converts a byte to a binary string of 1s and 0s.
+        /// </summary>
+        /// <remarks>
+        /// NOTE: The binary representation of one byte is eight chars, effectively 8x memory usage.
+        /// </remarks>
+        /// <param name="b">Byte to convert.</param>
+        /// <returns>One binary word.</returns>
+        public static string ByteToBinary(byte b)
+        {
+            StringBuilder sb = new StringBuilder(8);
+            sb.Append(Convert.ToString(b, 2));
+            for (int i = sb.Length; i < 8;)
+            {
+                sb.Append('0');
+                i++;
+            }
+            //Add Zeros
+            return sb.ToString();
+        }
+        /// <summary>
+        /// Converts a binary string of 1s and 0s to a byte.
+        /// </summary>
+        /// <remarks>
+        /// NOTE: The binary representation of one byte is eight chars, effectively 8x memory usage.
+        /// </remarks>
+        /// <param name="binary">Binary word to convert.</param>
+        /// <returns>One byte.</returns>
+        public static byte BinaryToByte(string binary)
+        {
+            try
+            {
+                return Convert.ToByte(binary, 2);
+            }
+            catch
+            {
+                throw new Exception("BinaryWordToByte: Invalid Binary.");
+            }
+        }
+        #endregion
+
         #region Byte(s) - Hex
         /// <summary>
         /// Converts bytes to a string of two-char hex words. (0 to 255 => 00 to FF)
@@ -172,6 +262,7 @@ namespace Pico.Conversion
             }
         }
         #endregion
+
         #region Notations
         /// <summary>
         /// Display a number count in it's readable form.
